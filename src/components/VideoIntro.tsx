@@ -20,18 +20,32 @@ interface VideoIntroProps {
 }
 
 /**
- * Full-screen opening video. It loads paused on its first frame behind
- * a "tap to open" control; the tap starts it with sound (a user gesture,
- * so mobile browsers allow audible playback) and primes the background
- * music at the same time. When the video ends — or errors, or stalls —
- * it fades and zooms away while the hero entrance plays underneath.
- * Once opened, it stays dismissed for the session, so switching
- * language doesn't replay it.
+ * Full-screen opening video, shown whole (never cropped) over a blurred
+ * copy of its own first frame so it fills any phone screen without
+ * black bars. It waits, on its poster, for a tap anywhere; the tap
+ * plays it with sound (a user gesture, so mobile browsers allow that)
+ * and primes the background music.
+ *
+ * Instant playback: as soon as the page loads, the whole file is
+ * prefetched into memory and the video is pointed at that in-memory
+ * copy while the poster is still up — invisible to the guest, and the
+ * only way to have the video ready before the tap on iOS, which ignores
+ * `preload`. The tap then plays from memory with no reload. A guest
+ * who taps before the prefetch finishes simply streams it instead.
+ *
+ * When the video ends — or errors, or stalls — it fades and zooms away
+ * while the hero entrance plays underneath. Once opened, it stays
+ * dismissed for the session, so switching language doesn't replay it.
  */
 export function VideoIntro({ content, children }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const finishedRef = useRef(false);
   const [state, setState] = useState<IntroState>('waiting');
+  // Mirror of `state` for the prefetch callback (which outlives renders).
+  const stateRef = useRef<IntroState>('waiting');
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const alreadyOpened = useSyncExternalStore(
     noopSubscribe,
@@ -45,6 +59,32 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     document.documentElement.classList.toggle('overlay-open', overlayUp);
     return () => document.documentElement.classList.remove('overlay-open');
   }, [overlayUp]);
+
+  // Prefetch the video into memory while the poster is showing.
+  useEffect(() => {
+    if (effectiveState !== 'waiting') return;
+    const controller = new AbortController();
+    let objectUrl: string | null = null;
+
+    fetch(ASSETS.introVideo, { signal: controller.signal })
+      .then((response) => (response.ok ? response.blob() : Promise.reject(new Error(response.statusText))))
+      .then((blob) => {
+        const video = videoRef.current;
+        if (!video || stateRef.current !== 'waiting') return;
+        objectUrl = URL.createObjectURL(blob);
+        // Swapping the source under the poster changes nothing on screen;
+        // it just means play() later reads from memory.
+        video.src = objectUrl;
+      })
+      .catch(() => undefined);
+
+    return () => {
+      // Tapped before the download finished: stop it so the video's own
+      // streaming request has the bandwidth to itself.
+      controller.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [effectiveState]);
 
   const finish = () => {
     if (finishedRef.current) return;
@@ -80,43 +120,49 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     });
   };
 
+  const waiting = effectiveState === 'waiting';
+
   return (
     <div
-      className={`fixed inset-0 z-50 bg-ink transition-[opacity,transform] duration-1000 ease-out ${
+      className={`fixed inset-0 z-50 overflow-hidden bg-ink transition-[opacity,transform] duration-1000 ease-out ${
         effectiveState === 'closing'
           ? 'pointer-events-none scale-[1.045] opacity-0'
           : 'scale-100 opacity-100'
       }`}
     >
+      {/* Ambient fill: the first frame, blurred, behind the whole video. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={ASSETS.introPoster}
+        alt=""
+        aria-hidden
+        className="intro-ambient absolute inset-0 h-full w-full object-cover"
+      />
+
       <video
         ref={videoRef}
         src={ASSETS.introVideo}
         poster={ASSETS.introPoster}
         playsInline
-        preload="auto"
+        preload="none"
         aria-label={content.videoLabel}
-        className="h-full w-full object-contain"
+        className="relative h-full w-full object-contain"
         onEnded={finish}
         onError={finish}
       />
 
-      {effectiveState === 'waiting' && (
-        <button
-          type="button"
-          onClick={start}
-          className="absolute inset-0 z-10 flex cursor-pointer flex-col items-center justify-center gap-5 bg-ink/35 text-ivory"
-        >
-          <span aria-hidden className="relative flex h-20 w-20 items-center justify-center">
-            <span className="tap-ring absolute inset-0 rounded-full border border-gold/70" />
-            <span className="flex h-16 w-16 items-center justify-center rounded-full border border-ivory/70 bg-ivory/10 backdrop-blur-sm">
-              <svg viewBox="0 0 24 24" className="ms-1 h-6 w-6" fill="currentColor">
-                <path d="M7 4.5v15a1 1 0 0 0 1.53.85l12-7.5a1 1 0 0 0 0-1.7l-12-7.5A1 1 0 0 0 7 4.5Z" />
-              </svg>
-            </span>
-          </span>
-          <span className="label-caps text-[0.78rem] text-ivory/90">{content.tapToOpen}</span>
-        </button>
-      )}
+      {/* Tap anywhere. Only the message is visible; it fades once playing. */}
+      <button
+        type="button"
+        onClick={start}
+        disabled={!waiting}
+        aria-hidden={!waiting}
+        className={`absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[18svh] transition-opacity duration-500 ${
+          waiting ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      >
+        <span className="intro-tap label-caps text-[0.82rem] text-ink/85">{content.tapToOpen}</span>
+      </button>
 
       {children}
     </div>

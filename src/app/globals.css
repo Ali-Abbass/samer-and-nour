@@ -409,19 +409,25 @@ html.overlay-open {
   animation: cue-pulse 2.2s ease-in-out infinite;
 }
 
-/* ─── "Tap to open" ring on the paused intro ──────────────────────── */
-@keyframes tap-ring {
-  0% {
-    transform: scale(0.9);
-    opacity: 0.9;
-  }
+/* ─── Paused intro: ambient fill + "tap to open" message ──────────── */
+.intro-ambient {
+  transform: scale(1.15);
+  filter: blur(36px) brightness(0.92) saturate(1.1);
+}
+@keyframes tap-breathe {
+  0%,
   100% {
-    transform: scale(1.45);
-    opacity: 0;
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
   }
 }
-.tap-ring {
-  animation: tap-ring 2.4s ease-out infinite;
+.intro-tap {
+  text-shadow:
+    0 0 14px rgba(238, 237, 235, 0.95),
+    0 0 4px rgba(238, 237, 235, 0.95);
+  animation: tap-breathe 2.8s ease-in-out infinite;
 }
 
 /* ─── Overlay entrance ────────────────────────────────────────────── */
@@ -530,7 +536,7 @@ html.overlay-open {
   .soft-rise,
   .digit-in,
   .gold-text,
-  .tap-ring {
+  .intro-tap {
     animation: none;
   }
   html {
