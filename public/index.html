@@ -1,0 +1,34 @@
+<!doctype html>
+<!--
+  Root redirect for the static export. GitHub Pages cannot do server-side
+  redirects, so "/" sends the guest to a locale page from here.
+
+  Arabic-language browsers go to ar/, everyone else to the default
+  locale (en/ — keep in sync with DEFAULT_LOCALE in src/config/site.ts).
+  Paths are relative on purpose so this works both at a domain root and
+  under a "/<repo>" base path.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Samer &amp; Nourhane</title>
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content="0; url=en/" />
+    <style>
+      html { background: #ebe8e1; }
+    </style>
+    <script>
+      (function () {
+        var lang = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+        var target = /^ar\b/i.test(lang) ? 'ar/' : 'en/';
+        window.location.replace(target + window.location.hash);
+      })();
+    </script>
+  </head>
+  <body>
+    <p style="font: 16px serif; color: #2a2521; padding: 2rem">
+      <a href="en/" style="color: inherit">English</a> ·
+      <a href="ar/" style="color: inherit" lang="ar" dir="rtl">العربية</a>
+    </p>
+  </body>
+</html>

@@ -1,0 +1,62 @@
+# Builds the static export and publishes ./out to GitHub Pages.
+#
+# One-time setup in the repository: Settings → Pages → Source: "GitHub
+# Actions". After that every push to `main` redeploys the site.
+#
+# `actions/configure-pages` reports where Pages will serve the site from
+# (custom domain, <user>.github.io, or <user>.github.io/<repo>) and the
+# build reads that via NEXT_PUBLIC_SITE_URL / NEXT_PUBLIC_BASE_PATH, so
+# neither value has to be hard-coded in src/config/site.ts.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race; let an in-flight one finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - run: npm ci
+
+      - name: Build static export
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
