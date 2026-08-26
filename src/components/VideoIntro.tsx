@@ -91,6 +91,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
       <video
         ref={videoRef}
         src={ASSETS.introVideo}
+        poster={ASSETS.introPoster}
         playsInline
         preload="auto"
         aria-label={content.videoLabel}

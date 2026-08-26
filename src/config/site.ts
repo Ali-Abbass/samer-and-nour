@@ -79,6 +79,10 @@ export const ASSETS = {
   /** Opening video shown before the invitation. Replace the file at
    *  this path to swap it. */
   introVideo: withBasePath('/videos/intro.mp4'),
+  /** First frame of the intro, shown instantly behind "tap to open"
+   *  while the video itself is still downloading. Regenerate it if you
+   *  swap the video (any still of its first frame will do). */
+  introPoster: withBasePath('/images/intro-poster.jpg'),
   favicon: withBasePath('/favicon.ico'),
   appleTouchIcon: withBasePath('/apple-touch-icon.png'),
 } as const;
