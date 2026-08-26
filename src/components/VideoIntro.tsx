@@ -11,6 +11,33 @@ const noopSubscribe = () => () => undefined;
 /** If the video stalls and never fires `ended`, release the guest. */
 const SAFETY_TIMEOUT_MS = 20000;
 
+/**
+ * The URL the <video> element streams from if the guest taps before
+ * the prefetch below has finished. It is the same file, but the query
+ * string gives it a separate HTTP-cache entry: Chrome serialises
+ * requests for one URL through its cache, so a media load that shares
+ * the URL with an in-flight (then aborted) fetch() stalls forever at
+ * readyState 0. Static hosts ignore the query string.
+ */
+const STREAM_SRC = `${ASSETS.introVideo}?stream`;
+
+declare global {
+  interface Window {
+    /** Set by the inline script below: the guest tapped before React hydrated. */
+    __introTapped?: boolean;
+  }
+}
+
+/**
+ * Runs from the server-rendered HTML, before React's JavaScript has
+ * arrived: on a slow connection the poster and message are visible for
+ * a second or two before hydration, and a tap in that window would
+ * otherwise do nothing. This starts the video inside that very tap
+ * (`click` carries user activation on touch, so sound is allowed) and
+ * leaves a flag for the component to pick up when it mounts.
+ */
+const PRE_HYDRATION_TAP = `(function(){var o=document.getElementById('intro-overlay');if(!o)return;o.addEventListener('click',function(){var v=o.querySelector('video');if(!v||window.__introTapped)return;window.__introTapped=true;try{v.muted=false;var p=v.play();if(p&&p.catch){p.catch(function(){});}}catch(e){}},{once:true});})();`;
+
 type IntroState = 'waiting' | 'playing' | 'closing' | 'closed';
 
 interface VideoIntroProps {
@@ -61,30 +88,38 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
   }, [overlayUp]);
 
   // Prefetch the video into memory while the poster is showing.
+  const objectUrlRef = useRef<string | null>(null);
   useEffect(() => {
     if (effectiveState !== 'waiting') return;
     const controller = new AbortController();
-    let objectUrl: string | null = null;
 
-    fetch(ASSETS.introVideo, { signal: controller.signal })
+    // `priority: 'high'` (Chromium) puts the video ahead of the photo,
+    // fonts and scripts still downloading; other browsers ignore it.
+    fetch(ASSETS.introVideo, { signal: controller.signal, priority: 'high' })
       .then((response) => (response.ok ? response.blob() : Promise.reject(new Error(response.statusText))))
       .then((blob) => {
         const video = videoRef.current;
         if (!video || stateRef.current !== 'waiting') return;
-        objectUrl = URL.createObjectURL(blob);
+        objectUrlRef.current = URL.createObjectURL(blob);
         // Swapping the source under the poster changes nothing on screen;
         // it just means play() later reads from memory.
-        video.src = objectUrl;
+        video.src = objectUrlRef.current;
       })
       .catch(() => undefined);
 
-    return () => {
-      // Tapped before the download finished: stop it so the video's own
-      // streaming request has the bandwidth to itself.
-      controller.abort();
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
+    // Tapped before the download finished: stop it so the video's own
+    // streaming request has the bandwidth to itself. (The object URL is
+    // deliberately NOT revoked here — the video may be playing from it.)
+    return () => controller.abort();
   }, [effectiveState]);
+
+  // Release the in-memory copy only when the intro is gone for good.
+  useEffect(
+    () => () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    },
+    [],
+  );
 
   const finish = () => {
     if (finishedRef.current) return;
@@ -102,11 +137,9 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     return () => window.clearTimeout(safety);
   }, [effectiveState]);
 
-  if (effectiveState === 'closed') return null;
-
   const start = () => {
     const video = videoRef.current;
-    if (!video || state !== 'waiting') return;
+    if (!video || stateRef.current !== 'waiting') return;
     // A real user gesture: also start the music silently so it is
     // already unlocked when the intro hands over to the invitation.
     primeAudio();
@@ -120,16 +153,30 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     });
   };
 
+  // A tap that landed before hydration already started the video (see
+  // PRE_HYDRATION_TAP); adopt that state instead of waiting again.
+  useEffect(() => {
+    if (effectiveState === 'waiting' && window.__introTapped) start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
+  }, []);
+
+  if (effectiveState === 'closed') return null;
+
   const waiting = effectiveState === 'waiting';
 
   return (
     <div
+      id="intro-overlay"
       className={`fixed inset-0 z-50 overflow-hidden bg-ink transition-[opacity,transform] duration-1000 ease-out ${
         effectiveState === 'closing'
           ? 'pointer-events-none scale-[1.045] opacity-0'
           : 'scale-100 opacity-100'
       }`}
     >
+      {effectiveState === 'waiting' && (
+        <script dangerouslySetInnerHTML={{ __html: PRE_HYDRATION_TAP }} />
+      )}
+
       {/* Ambient fill: the first frame, blurred, behind the whole video. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -141,7 +188,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
 
       <video
         ref={videoRef}
-        src={ASSETS.introVideo}
+        src={STREAM_SRC}
         poster={ASSETS.introPoster}
         playsInline
         preload="none"

@@ -120,4 +120,13 @@ Eastern Arabic numerals (٠١٢…).
   primes the background music, so the music can fade in by itself when
   the intro hands over. The audio element lives outside React so
   switching language never restarts the music.
+- The intro (`VideoIntro.tsx`) has three ways to start, all inside the
+  tap gesture: normally it plays from an in-memory copy prefetched on
+  page load (iOS ignores `preload`, so this is what makes the tap
+  instant); a tap before the prefetch finishes streams the file from
+  `intro.mp4?stream` — the query string is deliberate, it keeps the
+  stream on a separate HTTP-cache entry from the aborted prefetch, which
+  otherwise stalls the video in Chrome; and a tap before React has even
+  hydrated (slow connection) is caught by a small inline script in the
+  server HTML that starts the video itself.
 - All animations respect `prefers-reduced-motion`.

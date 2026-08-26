@@ -18,11 +18,14 @@ export function BackgroundImage() {
     <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-paper">
       <div id="backdrop-motion" className="absolute inset-x-0 -top-[9%] -bottom-[9%]">
         <div className="ken-burns absolute inset-0">
+          {/* Not `priority`: the photo is hidden behind the intro video at
+              first, and preloading 1.3 MB would compete with the video's
+              own prefetch on mobile data. It still starts loading at once
+              (it is in the viewport), just at normal priority. */}
           <Image
             src={ASSETS.heroImage}
             alt=""
             fill
-            priority
             sizes="100vw"
             className="object-cover object-[50%_30%]"
           />
