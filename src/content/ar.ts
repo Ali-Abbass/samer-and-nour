@@ -47,7 +47,7 @@ export const ar: InvitationContent = {
   },
 
   countdown: {
-    heading: 'العدّ التنازلي ليوم الفرح',
+    heading: 'العدّ التنازلي',
     days: 'يوم',
     hours: 'ساعة',
     minutes: 'دقيقة',
