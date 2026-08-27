@@ -415,12 +415,19 @@ html.overlay-open {
 .intro-ambient {
   transform: scale(1.15);
   filter: blur(36px) brightness(0.92) saturate(1.1);
-  transition: opacity 1.2s ease-in-out;
 }
-/* The clip fades to black at its end; the ambient bars follow it down
-   so the whole screen is black before the invitation fades in. */
-.intro-overlay-ending .intro-ambient {
+/* The clip ends on a bright frame without fading, so an ivory veil
+   rises over it (and the ambient bars) near the end: the whole screen
+   is white before the invitation fades in underneath. */
+.intro-veil {
   opacity: 0;
+  /* Shorter than ENDING_LEAD_S − HANDOVER_LEAD_S (1.1 s): `timeupdate`
+     only fires ~4×/s, so the veil must have slack to reach full white
+     before the hand-over. */
+  transition: opacity 0.9s ease-in-out;
+}
+.intro-overlay-ending .intro-veil {
+  opacity: 1;
 }
 /* The still fades a beat after the video's first frame is painted, so
    the two are never both absent. */

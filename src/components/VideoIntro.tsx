@@ -12,15 +12,16 @@ const noopSubscribe = () => () => undefined;
 const SAFETY_TIMEOUT_MS = 20000;
 
 /**
- * The intro clip fades to black over its last ~2 s and holds black for
- * the final 0.8 s. The blurred ambient bars around it fade to black in
- * step (from ENDING_LEAD_S before the end), so the whole screen is
- * uniformly black by the time the hand-over begins (HANDOVER_LEAD_S
- * before the end) and the invitation fades in from black. Re-measure
- * both if the clip changes.
+ * The clip (an envelope opening on cream paper, 8 s) ends on its
+ * brightest frame and never fades on its own, so the overlay whites it
+ * out itself: from ENDING_LEAD_S before the end an ivory veil rises
+ * over the video and its ambient bars (`.intro-veil`, 1.1 s), so the
+ * whole screen is uniformly ivory by the time the hand-over begins
+ * (HANDOVER_LEAD_S before the end) and the invitation fades in from
+ * white. Re-measure both if the clip changes.
  */
-const ENDING_LEAD_S = 2.0;
-const HANDOVER_LEAD_S = 0.8;
+const ENDING_LEAD_S = 1.4;
+const HANDOVER_LEAD_S = 0.3;
 
 /**
  * The URL the <video> element streams from if the guest taps before
@@ -208,7 +209,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
   return (
     <div
       id="intro-overlay"
-      className={`intro-overlay fixed inset-0 z-50 overflow-hidden bg-black ${
+      className={`intro-overlay fixed inset-0 z-50 overflow-hidden bg-ivory ${
         ending ? 'intro-overlay-ending' : ''
       } ${effectiveState === 'closing' ? 'intro-overlay-closing pointer-events-none' : ''}`}
     >
@@ -246,6 +247,10 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
           firstFramePainted ? 'opacity-0' : 'opacity-100'
         }`}
       />
+
+      {/* Whites the clip out at its end, so the hand-over is a fade from
+          white rather than a cut from the bright final frame. */}
+      <div aria-hidden className="intro-veil pointer-events-none absolute inset-0 bg-ivory" />
 
       {/* Tap anywhere. Only the message is visible; it fades once playing. */}
       <button
