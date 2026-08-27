@@ -475,17 +475,67 @@ html:not(.overlay-open) .ken-burns {
 @keyframes tap-breathe {
   0%,
   100% {
-    opacity: 0.6;
+    opacity: 0.82;
   }
   50% {
     opacity: 1;
   }
 }
+/* The message sits on its own soft pill rather than floating on a
+   glow: the clip behind it is bright cream and moves, and ink-on-glow
+   washed out over the pale frames. The pill keeps it readable over
+   every frame, and the breathing stays shallow (0.82, not 0.6) so the
+   words never fade toward illegible. */
 .intro-tap {
-  text-shadow:
-    0 0 14px rgba(238, 237, 235, 0.95),
-    0 0 4px rgba(238, 237, 235, 0.95);
+  border-radius: 999px;
+  border: 1px solid rgba(191, 167, 141, 0.55);
+  background: rgba(238, 237, 235, 0.78);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  backdrop-filter: blur(10px) saturate(1.1);
+  box-shadow: 0 10px 26px -16px rgba(70, 50, 20, 0.65);
+  /* `label-caps` puts 0.3em after the last letter; the smaller end
+     padding takes it back so the text sits centred in the pill. */
+  padding: 0.72em 1.15em 0.72em 1.45em;
   animation: tap-breathe 2.8s ease-in-out infinite;
+}
+[dir='rtl'] .intro-tap {
+  padding-inline: 1.3em;
+}
+/* No 300 ms double-tap-zoom wait, and no grey flash on the overlay. */
+.intro-tap-target {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Three dots while the clip buffers after a tap. */
+@keyframes dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+.intro-dots {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+.intro-dots i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: var(--gold-deep);
+  animation: dot-pulse 1.25s ease-in-out infinite;
+}
+.intro-dots i:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.intro-dots i:nth-child(3) {
+  animation-delay: 0.32s;
 }
 
 /* ─── Overlay entrance ────────────────────────────────────────────── */
@@ -595,7 +645,10 @@ html:not(.overlay-open) .ken-burns {
   .soft-rise,
   .digit-in,
   .gold-text,
-  .intro-tap {
+  .intro-tap,
+  /* The dots stay put and fully visible — still a "working on it"
+     sign, just without the bouncing. */
+  .intro-dots i {
     animation: none;
   }
   .intro-overlay,

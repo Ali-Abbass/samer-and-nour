@@ -44,11 +44,16 @@ declare global {
  * Runs from the server-rendered HTML, before React's JavaScript has
  * arrived: on a slow connection the poster and message are visible for
  * a second or two before hydration, and a tap in that window would
- * otherwise do nothing. This starts the video inside that very tap
- * (`click` carries user activation on touch, so sound is allowed) and
+ * otherwise do nothing. This starts the video inside that very tap and
  * leaves a flag for the component to pick up when it mounts.
+ *
+ * Like the hydrated handler below it goes on `pointerdown` and keeps
+ * `click` as the retry: if a browser declines to treat pointerdown as
+ * the activating gesture, the rejected promise clears the guard so the
+ * click landing right behind it tries again — with sound, rather than
+ * dropping to a muted fallback on the first refusal.
  */
-const PRE_HYDRATION_TAP = `(function(){var o=document.getElementById('intro-overlay');if(!o)return;o.addEventListener('click',function(){var v=o.querySelector('video');if(!v||window.__introTapped)return;window.__introTapped=true;try{v.muted=false;var p=v.play();if(p&&p.catch){p.catch(function(){});}}catch(e){}},{once:true});})();`;
+const PRE_HYDRATION_TAP = `(function(){var o=document.getElementById('intro-overlay');if(!o)return;var t=false;function go(){if(t||window.__introTapped)return;t=true;var v=o.querySelector('video');if(!v){t=false;return;}try{v.muted=false;var p=v.play();if(p&&p.then){p.then(function(){window.__introTapped=true;},function(){t=false;});}else{window.__introTapped=true;}}catch(e){t=false;}}o.addEventListener('pointerdown',go);o.addEventListener('click',go);})();`;
 
 type IntroState = 'waiting' | 'playing' | 'closing' | 'closed';
 
@@ -162,7 +167,18 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     return () => window.clearTimeout(safety);
   }, [effectiveState]);
 
-  const start = () => {
+  /**
+   * Begin playback. Called first from `pointerdown` — the moment the
+   * finger lands, ~100-300 ms before the browser synthesises `click` —
+   * and again from the `click` behind it if that first go was refused.
+   *
+   * `lastChance` marks that second call: only then is the muted
+   * fallback allowed. Falling back on the pointerdown attempt would
+   * turn a browser that simply doesn't accept pointerdown as the
+   * activating gesture into a silent intro, when the click a moment
+   * later would have played it with sound.
+   */
+  const start = (lastChance: boolean) => {
     const video = videoRef.current;
     if (!video || stateRef.current !== 'waiting') return;
     stateRef.current = 'playing';
@@ -172,6 +188,12 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     setState('playing');
     video.muted = false;
     video.play().catch(() => {
+      if (!lastChance) {
+        // Hand the attempt back to the click that follows.
+        stateRef.current = 'waiting';
+        setState('waiting');
+        return;
+      }
       // Audible playback refused (unusual inside a gesture) — try
       // muted, and if even that fails, go straight to the invitation.
       video.muted = true;
@@ -190,7 +212,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
   // A tap that landed before hydration already started the video (see
   // PRE_HYDRATION_TAP); adopt that state instead of waiting again.
   useEffect(() => {
-    if (effectiveState === 'waiting' && window.__introTapped) start();
+    if (effectiveState === 'waiting' && window.__introTapped) start(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount only
   }, []);
 
@@ -228,7 +250,11 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
         ref={videoRef}
         src={STREAM_SRC}
         playsInline
-        preload="none"
+        /* Header only (a few KB — the file is +faststart, so the moov
+           box is at the front). Having duration and codecs already
+           parsed means the tap goes straight to fetching media data
+           instead of starting from nothing. */
+        preload="metadata"
         aria-label={content.videoLabel}
         className="relative h-full w-full object-contain"
         onTimeUpdate={onTimeUpdate}
@@ -252,17 +278,34 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
           white rather than a cut from the bright final frame. */}
       <div aria-hidden className="intro-veil pointer-events-none absolute inset-0 bg-ivory" />
 
+      {/* Tapped, but no frame on screen yet — the clip is still
+          buffering. Without this the message fades out and nothing
+          visibly happens, which reads as a tap that didn't register. */}
+      <div
+        aria-hidden
+        className={`intro-loading pointer-events-none absolute inset-0 z-10 flex items-end justify-center pb-[18svh] transition-opacity duration-300 ${
+          effectiveState === 'playing' && !firstFramePainted ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        <span className="intro-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+      </div>
+
       {/* Tap anywhere. Only the message is visible; it fades once playing. */}
       <button
         type="button"
-        onClick={start}
+        onPointerDown={() => start(false)}
+        onClick={() => start(true)}
         disabled={!waiting}
         aria-hidden={!waiting}
-        className={`absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[18svh] transition-opacity duration-500 ${
+        className={`intro-tap-target absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[18svh] transition-opacity duration-500 ${
           waiting ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >
-        <span className="intro-tap label-caps text-[0.82rem] text-ink/85">{content.tapToOpen}</span>
+        <span className="intro-tap label-caps text-[0.95rem] text-ink">{content.tapToOpen}</span>
       </button>
 
       {/* The overlay's own copy of the fixed UI (language toggle) is dropped
