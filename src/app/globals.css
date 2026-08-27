@@ -499,25 +499,38 @@ html:not(.overlay-open) .ken-burns {
     opacity: 1;
   }
 }
-/* The message sits on its own soft pill rather than floating on a
-   glow: the clip behind it is bright cream and moves, and ink-on-glow
-   washed out over the pale frames. The pill keeps it readable over
-   every frame, and the breathing stays shallow (0.82, not 0.6) so the
-   words never fade toward illegible. */
+/* No frame, no edge: the words sit in their own pool of ivory light,
+   densest behind the letters and fading to nothing well inside the
+   box. `closest-side` inscribes the ellipse in the padding box, so the
+   generous padding *is* the falloff — enlarge the padding to spread
+   the glow, not the gradient stops.
+
+   Deliberately no `backdrop-filter` here: it would blur a hard-edged
+   rounded rectangle out of the clip behind, which is exactly the edge
+   this is meant to avoid. Legibility comes from the glow plus the halo
+   on the letters themselves, and the breathing stays shallow (0.82,
+   not 0.6) so the words never fade toward illegible. */
 .intro-tap {
-  border-radius: 999px;
-  border: 1px solid rgba(191, 167, 141, 0.55);
-  background: rgba(238, 237, 235, 0.78);
-  -webkit-backdrop-filter: blur(10px) saturate(1.1);
-  backdrop-filter: blur(10px) saturate(1.1);
-  box-shadow: 0 10px 26px -16px rgba(70, 50, 20, 0.65);
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(238, 237, 235, 0.96),
+    /* The plateau runs out to 58% because the first and last letters
+       sit near 78% of the horizontal radius — an earlier falloff left
+       the ends of the line on almost no light. */
+    rgba(238, 237, 235, 0.92) 58%,
+    rgba(238, 237, 235, 0.52) 80%,
+    rgba(238, 237, 235, 0) 100%
+  );
+  text-shadow:
+    0 0 16px rgba(238, 237, 235, 0.95),
+    0 0 5px rgba(238, 237, 235, 0.9);
   /* `label-caps` puts 0.3em after the last letter; the smaller end
-     padding takes it back so the text sits centred in the pill. */
-  padding: 0.72em 1.15em 0.72em 1.45em;
+     padding takes it back so the text sits centred in the glow. */
+  padding: 1.5em 2.4em 1.5em 2.7em;
   animation: tap-breathe 2.8s ease-in-out infinite;
 }
 [dir='rtl'] .intro-tap {
-  padding-inline: 1.3em;
+  padding-inline: 2.55em;
 }
 /* No 300 ms double-tap-zoom wait, and no grey flash on the overlay. */
 .intro-tap-target {
