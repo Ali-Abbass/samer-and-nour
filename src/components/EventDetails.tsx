@@ -12,7 +12,7 @@ export function EventDetails({ content }: EventDetailsProps) {
     <Section id="s3">
       <Card>
         <h2
-          className="label-caps reveal text-[0.74rem] text-stone"
+          className="label-caps reveal text-[0.84rem] text-stone"
           style={{ '--reveal-delay': '0ms' } as React.CSSProperties}
         >
           {content.heading}

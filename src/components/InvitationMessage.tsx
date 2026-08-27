@@ -18,7 +18,7 @@ export function InvitationMessage({ content }: InvitationMessageProps) {
           {content.lines.map((line) => (
             <p
               key={line}
-              className="poem font-display text-[clamp(1.02rem,4.1vw,1.2rem)] font-normal leading-[1.5] text-ink/85"
+              className="font-display text-[clamp(1.02rem,4.1vw,1.2rem)] font-normal leading-[1.5] text-ink/85"
             >
               {line}
             </p>
@@ -32,11 +32,11 @@ export function InvitationMessage({ content }: InvitationMessageProps) {
           className="reveal flex w-full flex-col items-center gap-2 sm:flex-row sm:items-stretch sm:justify-center sm:gap-0"
           style={{ '--reveal-delay': '280ms' } as React.CSSProperties}
         >
-          <p className="flex-1 font-display text-[clamp(1.1rem,4vw,1.35rem)] font-medium leading-snug text-ink sm:text-end sm:pe-6">
+          <p className="flex-1 font-display text-[clamp(1.1rem,4vw,1.35rem)] font-semibold leading-snug text-ink sm:text-end sm:pe-6">
             {content.familyA}
           </p>
           <span aria-hidden className="h-px w-10 bg-champagne sm:h-auto sm:w-px" />
-          <p className="flex-1 font-display text-[clamp(1.1rem,4vw,1.35rem)] font-medium leading-snug text-ink sm:text-start sm:ps-6">
+          <p className="flex-1 font-display text-[clamp(1.1rem,4vw,1.35rem)] font-semibold leading-snug text-ink sm:text-start sm:ps-6">
             {content.familyB}
           </p>
         </div>

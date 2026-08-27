@@ -14,7 +14,7 @@ export function Venue({ content }: VenueProps) {
     <Section id="s4">
       <Card>
         <h2
-          className="label-caps reveal text-[0.74rem] text-stone"
+          className="label-caps reveal text-[0.84rem] text-stone"
           style={{ '--reveal-delay': '0ms' } as React.CSSProperties}
         >
           {content.heading}
@@ -26,7 +26,7 @@ export function Venue({ content }: VenueProps) {
           className="reveal flex flex-col items-center gap-2"
           style={{ '--reveal-delay': '240ms' } as React.CSSProperties}
         >
-          <p className="font-display text-[clamp(1.8rem,7vw,2.5rem)] font-normal leading-snug text-ink">
+          <p className="font-display text-[clamp(1.8rem,7vw,2.5rem)] font-medium leading-snug text-ink">
             {content.name}
           </p>
           <p className="max-w-xs font-body text-[1rem] leading-relaxed text-stone">

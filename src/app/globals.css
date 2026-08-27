@@ -243,6 +243,15 @@ html.overlay-open {
   color: transparent;
   -webkit-text-fill-color: transparent;
   animation: gold-shimmer 9s ease-in-out infinite alternate;
+  /* `background-clip: text` paints only inside this element's own box,
+     but Pinyon Script's swashes (the tail of a capital N, the flourish
+     under an S) reach well past the glyph advance width and the em box
+     — anything outside would be filled with nothing and look sliced
+     off. The padding grows the painted area; the matching negative
+     margin takes the space straight back, so nothing moves. Keep the
+     two in step if either changes. */
+  padding: 0.14em 0.26em;
+  margin: -0.14em -0.26em;
 }
 @keyframes gold-shimmer {
   from {
