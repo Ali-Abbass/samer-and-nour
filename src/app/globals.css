@@ -409,10 +409,52 @@ html.overlay-open {
   animation: cue-pulse 2.2s ease-in-out infinite;
 }
 
-/* ─── Paused intro: ambient fill + "tap to open" message ──────────── */
+/* ─── Intro overlay ──────────────────────────────────────────────────
+   Ambient fill + first-frame still + "tap to open" message, and the
+   dissolve into the invitation. */
 .intro-ambient {
   transform: scale(1.15);
   filter: blur(36px) brightness(0.92) saturate(1.1);
+  transition: opacity 1.2s ease-in-out;
+}
+/* The clip fades to black at its end; the ambient bars follow it down
+   so the whole screen is black before the invitation fades in. */
+.intro-overlay-ending .intro-ambient {
+  opacity: 0;
+}
+/* The still fades a beat after the video's first frame is painted, so
+   the two are never both absent. */
+.intro-still {
+  transition: opacity 0.35s ease-out;
+}
+/* A true dissolve: symmetric easing so the last frame lingers for a
+   beat before cross-fading, instead of dropping away at once. */
+.intro-overlay {
+  transition:
+    opacity 1.4s cubic-bezier(0.45, 0.05, 0.55, 0.95),
+    transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.intro-overlay-closing {
+  opacity: 0;
+  transform: scale(1.06);
+}
+
+/* Focus pull: the photo settles from soft to sharp as the invitation
+   opens (the ivory cards are siblings, so this filter can't affect
+   their blur). Keyed on the overlay lock lifting; on a language switch
+   it simply plays on load. */
+@keyframes focus-pull {
+  from {
+    filter: blur(14px) brightness(1.08);
+  }
+  to {
+    filter: blur(0) brightness(1);
+  }
+}
+html:not(.overlay-open) .ken-burns {
+  animation:
+    focus-pull 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) both,
+    ken-burns 32s ease-in-out infinite alternate;
 }
 @keyframes tap-breathe {
   0%,
@@ -531,6 +573,7 @@ html.overlay-open {
     animation: none;
   }
   .ken-burns,
+  html:not(.overlay-open) .ken-burns,
   .cue-hand,
   .cue-chevron,
   .soft-rise,
@@ -538,6 +581,10 @@ html.overlay-open {
   .gold-text,
   .intro-tap {
     animation: none;
+  }
+  .intro-overlay,
+  .intro-still {
+    transition: none;
   }
   html {
     scroll-behavior: auto;

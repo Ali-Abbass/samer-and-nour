@@ -12,6 +12,17 @@ const noopSubscribe = () => () => undefined;
 const SAFETY_TIMEOUT_MS = 20000;
 
 /**
+ * The intro clip fades to black over its last ~2 s and holds black for
+ * the final 0.8 s. The blurred ambient bars around it fade to black in
+ * step (from ENDING_LEAD_S before the end), so the whole screen is
+ * uniformly black by the time the hand-over begins (HANDOVER_LEAD_S
+ * before the end) and the invitation fades in from black. Re-measure
+ * both if the clip changes.
+ */
+const ENDING_LEAD_S = 2.0;
+const HANDOVER_LEAD_S = 0.8;
+
+/**
  * The URL the <video> element streams from if the guest taps before
  * the prefetch below has finished. It is the same file, but the query
  * string gives it a separate HTTP-cache entry: Chrome serialises
@@ -49,30 +60,39 @@ interface VideoIntroProps {
 /**
  * Full-screen opening video, shown whole (never cropped) over a blurred
  * copy of its own first frame so it fills any phone screen without
- * black bars. It waits, on its poster, for a tap anywhere; the tap
- * plays it with sound (a user gesture, so mobile browsers allow that)
- * and primes the background music.
+ * black bars. It waits, on a still of its first frame, for a tap
+ * anywhere; the tap plays it with sound (a user gesture, so mobile
+ * browsers allow that) and primes the background music.
+ *
+ * Seamless start: the still is a separate <img> laid exactly over the
+ * video, not the browser's `poster` — a poster is swapped out the
+ * instant playback begins (a visible jump, and a black flash on iOS),
+ * whereas the still here is only dissolved once the video reports its
+ * first frame actually painted.
  *
  * Instant playback: as soon as the page loads, the whole file is
  * prefetched into memory and the video is pointed at that in-memory
- * copy while the poster is still up — invisible to the guest, and the
+ * copy while the still is still up — invisible to the guest, and the
  * only way to have the video ready before the tap on iOS, which ignores
  * `preload`. The tap then plays from memory with no reload. A guest
  * who taps before the prefetch finishes simply streams it instead.
  *
- * When the video ends — or errors, or stalls — it fades and zooms away
- * while the hero entrance plays underneath. Once opened, it stays
- * dismissed for the session, so switching language doesn't replay it.
+ * Near its last frame the overlay dissolves and zooms away while the
+ * hero entrance plays underneath (also on error or a stall). Once
+ * opened, it stays dismissed for the session, so switching language
+ * doesn't replay it.
  */
 export function VideoIntro({ content, children }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const finishedRef = useRef(false);
   const [state, setState] = useState<IntroState>('waiting');
-  // Mirror of `state` for the prefetch callback (which outlives renders).
+  // Synchronous mirror of `state` for callbacks that outlive renders
+  // (the prefetch) — updated in start() itself, before React re-renders,
+  // so a prefetch landing in that same tick can't swap the source under
+  // a video that has just started playing.
   const stateRef = useRef<IntroState>('waiting');
-  useEffect(() => {
-    stateRef.current = state;
-  }, [state]);
+  const [firstFramePainted, setFirstFramePainted] = useState(false);
+  const [ending, setEnding] = useState(false);
 
   const alreadyOpened = useSyncExternalStore(
     noopSubscribe,
@@ -87,7 +107,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     return () => document.documentElement.classList.remove('overlay-open');
   }, [overlayUp]);
 
-  // Prefetch the video into memory while the poster is showing.
+  // Prefetch the video into memory while the still is showing.
   const objectUrlRef = useRef<string | null>(null);
   useEffect(() => {
     if (effectiveState !== 'waiting') return;
@@ -99,9 +119,9 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
       .then((response) => (response.ok ? response.blob() : Promise.reject(new Error(response.statusText))))
       .then((blob) => {
         const video = videoRef.current;
-        if (!video || stateRef.current !== 'waiting') return;
+        if (!video || stateRef.current !== 'waiting' || !video.paused) return;
         objectUrlRef.current = URL.createObjectURL(blob);
-        // Swapping the source under the poster changes nothing on screen;
+        // Swapping the source under the still changes nothing on screen;
         // it just means play() later reads from memory.
         video.src = objectUrlRef.current;
       })
@@ -126,8 +146,12 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     finishedRef.current = true;
     sessionStorage.setItem(OPENED_KEY, 'true');
     window.dispatchEvent(new Event(OPEN_EVENT));
+    stateRef.current = 'closing';
     setState('closing');
-    window.setTimeout(() => setState('closed'), 1000);
+    window.setTimeout(() => {
+      stateRef.current = 'closed';
+      setState('closed');
+    }, 1300);
   };
 
   // The safety net only counts once playback has actually been started.
@@ -140,6 +164,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
   const start = () => {
     const video = videoRef.current;
     if (!video || stateRef.current !== 'waiting') return;
+    stateRef.current = 'playing';
     // A real user gesture: also start the music silently so it is
     // already unlocked when the intro hands over to the invitation.
     primeAudio();
@@ -151,6 +176,14 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
       video.muted = true;
       video.play().catch(finish);
     });
+    // Dissolve the still only once a real frame is on screen.
+    const painted = () => setFirstFramePainted(true);
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      video.requestVideoFrameCallback(painted);
+    } else {
+      // Older Firefox: the first timeupdate lands a frame or two later.
+      video.addEventListener('timeupdate', painted, { once: true });
+    }
   };
 
   // A tap that landed before hydration already started the video (see
@@ -164,18 +197,22 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
 
   const waiting = effectiveState === 'waiting';
 
+  const onTimeUpdate = () => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration)) return;
+    const remaining = video.duration - video.currentTime;
+    if (remaining <= ENDING_LEAD_S && !ending) setEnding(true);
+    if (remaining <= HANDOVER_LEAD_S) finish();
+  };
+
   return (
     <div
       id="intro-overlay"
-      className={`fixed inset-0 z-50 overflow-hidden bg-ink transition-[opacity,transform] duration-1000 ease-out ${
-        effectiveState === 'closing'
-          ? 'pointer-events-none scale-[1.045] opacity-0'
-          : 'scale-100 opacity-100'
-      }`}
+      className={`intro-overlay fixed inset-0 z-50 overflow-hidden bg-black ${
+        ending ? 'intro-overlay-ending' : ''
+      } ${effectiveState === 'closing' ? 'intro-overlay-closing pointer-events-none' : ''}`}
     >
-      {effectiveState === 'waiting' && (
-        <script dangerouslySetInnerHTML={{ __html: PRE_HYDRATION_TAP }} />
-      )}
+      {waiting && <script dangerouslySetInnerHTML={{ __html: PRE_HYDRATION_TAP }} />}
 
       {/* Ambient fill: the first frame, blurred, behind the whole video. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -189,13 +226,25 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
       <video
         ref={videoRef}
         src={STREAM_SRC}
-        poster={ASSETS.introPoster}
         playsInline
         preload="none"
         aria-label={content.videoLabel}
         className="relative h-full w-full object-contain"
+        onTimeUpdate={onTimeUpdate}
         onEnded={finish}
         onError={finish}
+      />
+
+      {/* The still of the first frame, exactly over the video, until the
+          video has painted its own first frame. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={ASSETS.introPoster}
+        alt=""
+        aria-hidden
+        className={`intro-still absolute inset-0 h-full w-full object-contain ${
+          firstFramePainted ? 'opacity-0' : 'opacity-100'
+        }`}
       />
 
       {/* Tap anywhere. Only the message is visible; it fades once playing. */}
@@ -211,7 +260,11 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
         <span className="intro-tap label-caps text-[0.82rem] text-ink/85">{content.tapToOpen}</span>
       </button>
 
-      {children}
+      {/* The overlay's own copy of the fixed UI (language toggle) is dropped
+          the moment the dissolve starts: the page's identical pill sits
+          underneath, and keeping this one would make it drift outward
+          with the overlay's zoom. */}
+      {effectiveState !== 'closing' && children}
     </div>
   );
 }

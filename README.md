@@ -51,7 +51,7 @@ Everything you're likely to edit lives in two places:
 | **Map pin** | `VENUE.mapQuery` today; fill in `VENUE.placeId` / `VENUE.coordinates` (marked `TODO`) when you have the exact pin. |
 | **Background photo** | `ASSETS.heroImage` → currently `public/images/hero-original.jpg` (the bright, untouched photo). It is a fixed backdrop that every card scrolls over; the white-gold theme adds its own warm grade, vignette and ivory haze, so it wants a bright photo. `hero.jpg` is the pre-darkened version used by the earlier dark theme, kept only for reference. Portrait photos work best: on phones the couple should sit in the top ~45% (`object-[50%_30%]` in `BackgroundImage.tsx` nudges the crop). |
 | **WhatsApp/social preview image** | `ASSETS.ogImage` → replace `public/images/og.jpg` (1200×630). |
-| **Music** | `ASSETS.audioTrack` → replace `public/audio/theme.mp3`. |
+| **Music** | `ASSETS.audioTrack` → replace `public/audio/theme.mp3`. Keep it light — it starts downloading at the tap, alongside the video. The current file is 96 kbps MP3 (1.3 MB for 1:50); re-encode a new track with `npx -p ffmpeg-static -c 'ffmpeg -i in.mp3 -c:a libmp3lame -b:a 96k public/audio/theme.mp3'`. |
 | **Opening video** | `ASSETS.introVideo` → replace `public/videos/intro.mp4`. It waits on its poster (`public/images/intro-poster.jpg`, a still of its first frame — replace it too when you swap the video) for a tap anywhere; the tap plays it with sound and primes the music, and when it ends it fades into the invitation. The video is shown whole over a blurred copy of the poster, so any aspect ratio fills the phone without cropping. Keep the file small (the current one is 780 px wide, H.264 CRF 23, ~0.85 MB) — it is prefetched into memory on page load so the tap plays instantly, and phones on mobile data are the audience. To re-encode a new clip without a system ffmpeg: `npx -p ffmpeg-static -c 'ffmpeg -i in.mp4 -c:v libx264 -preset slow -crf 23 -vf scale=780:-2,format=yuv420p -c:a aac -b:a 96k -movflags +faststart public/videos/intro.mp4'`. |
 | **Deployed URL** | `SITE_URL` — read from `NEXT_PUBLIC_SITE_URL`, which the deploy workflow sets automatically from the GitHub Pages config. Only the local fallback lives in the file. |
 | **Default language** | `DEFAULT_LOCALE`, plus the matching `url=en/` in `public/index.html` (see Notes). |
@@ -120,8 +120,14 @@ Eastern Arabic numerals (٠١٢…).
   primes the background music, so the music can fade in by itself when
   the intro hands over. The audio element lives outside React so
   switching language never restarts the music.
-- The intro (`VideoIntro.tsx`) has three ways to start, all inside the
-  tap gesture: normally it plays from an in-memory copy prefetched on
+- The intro (`VideoIntro.tsx`) shows a still of the first frame as its
+  own `<img>` over the video (not the `poster` attribute, which browsers
+  swap out the instant playback starts — a visible jump, and a black
+  flash on iOS) and only dissolves it once the video reports its first
+  frame painted. It hands over 0.4 s before the last frame so the
+  dissolve overlaps the ending, and the photo behind does a short
+  focus-pull (blur → sharp) as the invitation opens.
+- The intro has three ways to start, all inside the tap gesture: normally it plays from an in-memory copy prefetched on
   page load (iOS ignores `preload`, so this is what makes the tap
   instant); a tap before the prefetch finishes streams the file from
   `intro.mp4?stream` — the query string is deliberate, it keeps the

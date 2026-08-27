@@ -140,7 +140,7 @@ export function AudioPlayer({ labels }: AudioPlayerProps) {
       onClick={toggleMute}
       aria-label={muted ? labels.unmute : labels.mute}
       aria-pressed={muted}
-      className="glass-pill fixed top-5 start-5 z-40 flex h-11 w-11 items-center justify-center rounded-full"
+      className="glass-pill soft-rise fixed top-5 start-5 z-40 flex h-11 w-11 items-center justify-center rounded-full"
     >
       {muted ? (
         <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
