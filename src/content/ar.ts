@@ -72,6 +72,7 @@ export const ar: InvitationContent = {
   closing: {
     line: 'بانتظار أن نفرح بلقائكم.',
     monogram: 'سامر ونورهان',
+    rsvp: 'تأكيد الحضور ضروري قبل ٢٠ أيلول',
   },
 
   audio: {

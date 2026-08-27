@@ -96,6 +96,15 @@ Eastern Arabic numerals (٠١٢…).
 - Card shape: the torn edges are two tiny SVG masks (`--torn-top` /
   `--torn-bottom` in `globals.css`), generated deterministically —
   change `--torn-edge` to make the tear taller or shorter.
+- Card texture: `--paper-grain` is a seamless 200 px tile of SVG
+  fractal noise, the top background layer on `.card`, giving the sheet a
+  card-stock tooth. It runs two turbulence passes with different seeds —
+  one warm-dark, one white. One pass alone could only darken (its colour
+  is fixed, only alpha varies), which greys the ivory and eats the
+  translucency the card needs to show the photo through. Tune strength
+  with the two alpha values (last number of each `feColorMatrix`, 0.30
+  dark / 0.34 light) and grain size with `baseFrequency`; keep
+  `stitchTiles='stitch'` or the tile seams into a visible grid.
 - Don't put `filter`, `opacity` or `mask` on any *ancestor* of `.card`:
   browsers then stop the card's backdrop blur from seeing the photo.
   That is why the shadow is a masked sibling and the scroll motion is a

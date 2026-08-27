@@ -71,6 +71,8 @@ export interface InvitationContent {
   closing: {
     line: string;
     monogram: string;
+    /** RSVP deadline, the last practical line of the invitation. */
+    rsvp: string;
   };
 
   audio: {

@@ -26,6 +26,21 @@ export function Closing({ content }: ClosingProps) {
         >
           <span className="gold-text">{content.monogram}</span>
         </p>
+
+        {/* RSVP deadline: the last line of the invitation, below the
+            names, as it sits on a printed one. Deliberately quieter than
+            the closing line above — practical, not poetic — but in
+            gold-deep and behind its own rule so a date the guest has to
+            act on doesn't read as a footnote. */}
+        <div
+          className="reveal flex flex-col items-center gap-3"
+          style={{ '--reveal-delay': '420ms' } as React.CSSProperties}
+        >
+          <span aria-hidden className="h-px w-12 bg-champagne/70" />
+          <p className="max-w-xs font-body text-[0.95rem] leading-relaxed text-gold-deep">
+            {content.rsvp}
+          </p>
+        </div>
       </Card>
     </Section>
   );
