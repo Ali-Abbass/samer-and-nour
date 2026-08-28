@@ -7,7 +7,7 @@
  * page never references (and the browser never downloads) the other
  * locale's fonts.
  *
- * English: Pinyon Script (copperplate names) + Cormorant Garamond +
+ * English: Mishega (script names) + Cormorant Garamond +
  * EB Garamond — the classic formal-invitation pairing.
  * Arabic:  Aref Ruqaa (calligraphic names) + Amiri (classic naskh) +
  * IBM Plex Sans Arabic (kept for small-text legibility).
@@ -18,12 +18,24 @@ import {
   Cormorant_Garamond,
   EB_Garamond,
   IBM_Plex_Sans_Arabic,
-  Pinyon_Script,
 } from 'next/font/google';
+import localFont from 'next/font/local';
 
-const pinyon = Pinyon_Script({
+/**
+ * Mishega is not on Google Fonts, so it ships with the repo and is
+ * self-hosted through next/font/local (same hashed-URL, preloaded
+ * treatment the Google faces get).
+ *
+ * The .woff2 is a straight format conversion of the .otf, not a
+ * subset: the licence (`fonts/mishega/`) allows converting to WOFF but
+ * not modifying the font, and dropping glyphs is hard to argue is not
+ * a modification. It costs ~34 KB whole, which is small enough that
+ * subsetting was not worth the ambiguity.
+ */
+const mishega = localFont({
+  src: '../../fonts/Mishega.woff2',
   weight: '400',
-  subsets: ['latin'],
+  style: 'normal',
   display: 'swap',
   variable: '--font-script-family',
 });
@@ -69,6 +81,6 @@ const plexArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const fontClassesByLocale = {
-  en: `${pinyon.variable} ${cormorant.variable} ${ebGaramond.variable}`,
+  en: `${mishega.variable} ${cormorant.variable} ${ebGaramond.variable}`,
   ar: `${arefRuqaa.variable} ${amiri.variable} ${plexArabic.variable}`,
 } as const;

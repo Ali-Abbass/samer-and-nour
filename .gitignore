@@ -20,6 +20,14 @@
 # production
 /build
 
+# Vendor font download (original .otf/.ttf, licence, specimens).
+# Kept out of the repo on purpose: this repo is public so Pages can
+# serve it for free, and Mishega's licence allows embedding the font in
+# a personal site but not publishing the font itself. The build needs
+# only src/fonts/Mishega.woff2, which is committed; keep the original
+# download locally, and see README "Colors & fonts".
+/fonts
+
 # misc
 .DS_Store
 *.pem

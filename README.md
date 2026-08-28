@@ -74,12 +74,24 @@ Eastern Arabic numerals (٠١٢…).
   card uses `--ink` / `--stone` / `--gold-deep`, all ≥ 4.5:1 on paper.
   A full recolor is a one-file edit.
 - Fonts: `src/app/[locale]/fonts.ts`, three roles per locale —
-  *script* (the couple's names: Pinyon Script / Aref Ruqaa for Arabic),
+  *script* (the couple's names: Mishega / Aref Ruqaa for Arabic),
   *display* (headings, dates, family names: Cormorant Garamond / Amiri)
   and *body* (EB Garamond / IBM Plex Sans Arabic). Names use the
   `.script-names` class (never add letter-spacing to it — it breaks the
   connected script). Poetic lines use `.poem`: italic for Latin, upright
   for Arabic.
+- Mishega is the one face not on Google Fonts. It is self-hosted via
+  `next/font/local` from `src/fonts/Mishega.woff2` — a plain format
+  conversion of the vendor `.otf`, not a subset, because its licence
+  permits converting to WOFF but not modifying the font.
+  Its licence is *free for personal use*: a wedding site for friends and
+  family qualifies, anything commercial needs a licence from the author.
+  That licence allows embedding the font in such a site but not
+  publishing the font itself, so the vendor download (original
+  `.otf`/`.ttf`, licence text, specimens) is kept **locally only** —
+  `fonts/` is gitignored, since this repo is public for Pages. Only the
+  `.woff2` the build embeds is committed. Keep a copy of that download
+  somewhere safe; it is not recoverable from this repo.
 
 ### The scroll experience
 
