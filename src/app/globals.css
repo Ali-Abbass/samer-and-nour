@@ -448,10 +448,14 @@ html.overlay-open {
    is white before the invitation fades in underneath. */
 .intro-veil {
   opacity: 0;
-  /* Shorter than ENDING_LEAD_S − HANDOVER_LEAD_S (1.1 s): `timeupdate`
+  /* A bloom, not a wash: brightest at the centre, settling to the
+     page's ivory at the edges, so the hand-over reads as a flash of
+     light rather than a white card dropped over the clip. */
+  background: radial-gradient(ellipse 78% 62% at 50% 52%, #ffffff, #f7f5f2 55%, var(--ivory) 100%);
+  /* Shorter than ENDING_LEAD_S − HANDOVER_LEAD_S (0.38 s): `timeupdate`
      only fires ~4×/s, so the veil must have slack to reach full white
      before the hand-over. */
-  transition: opacity 0.9s ease-in-out;
+  transition: opacity 0.3s ease-out;
 }
 .intro-overlay-ending .intro-veil {
   opacity: 1;
@@ -461,16 +465,18 @@ html.overlay-open {
 .intro-still {
   transition: opacity 0.35s ease-out;
 }
-/* A true dissolve: symmetric easing so the last frame lingers for a
-   beat before cross-fading, instead of dropping away at once. */
+/* A quick clearing, not a dissolve: the screen is already full of
+   light by this point, so the overlay gets out of the way fast and
+   ease-out front-loads the fade. The zoom is only a hint (1.03) —
+   at this speed a larger drift reads as a lurch. */
 .intro-overlay {
   transition:
-    opacity 1.4s cubic-bezier(0.45, 0.05, 0.55, 0.95),
-    transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    opacity 0.4s ease-out,
+    transform 0.45s ease-out;
 }
 .intro-overlay-closing {
   opacity: 0;
-  transform: scale(1.06);
+  transform: scale(1.03);
 }
 
 /* Focus pull: the photo settles from soft to sharp as the invitation
@@ -487,7 +493,7 @@ html.overlay-open {
 }
 html:not(.overlay-open) .ken-burns {
   animation:
-    focus-pull 2.2s cubic-bezier(0.22, 0.61, 0.36, 1) both,
+    focus-pull 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both,
     ken-burns 32s ease-in-out infinite alternate;
 }
 @keyframes tap-breathe {

@@ -14,14 +14,19 @@ const SAFETY_TIMEOUT_MS = 20000;
 /**
  * The clip (an envelope opening on cream paper, 8 s) ends on its
  * brightest frame and never fades on its own, so the overlay whites it
- * out itself: from ENDING_LEAD_S before the end an ivory veil rises
- * over the video and its ambient bars (`.intro-veil`, 1.1 s), so the
- * whole screen is uniformly ivory by the time the hand-over begins
- * (HANDOVER_LEAD_S before the end) and the invitation fades in from
- * white. Re-measure both if the clip changes.
+ * out itself: from ENDING_LEAD_S before the end a bloom of light rises
+ * over the video and its ambient bars (`.intro-veil`, 0.3 s), and the
+ * hand-over begins HANDOVER_LEAD_S before the end, cross-fading to the
+ * invitation in 0.4 s. The whole thing is a ~0.8 s flash of light, not
+ * a dissolve. Re-measure both if the clip changes.
+ *
+ * The gap between them (0.38 s) is deliberately wider than the veil's
+ * 0.3 s: `timeupdate` fires only ~4x/s, so a tick landing late can
+ * compress the window, and the slack keeps the screen fully lit before
+ * the cross-fade starts.
  */
-const ENDING_LEAD_S = 1.4;
-const HANDOVER_LEAD_S = 0.3;
+const ENDING_LEAD_S = 0.6;
+const HANDOVER_LEAD_S = 0.22;
 
 /**
  * The URL the <video> element streams from if the guest taps before
@@ -154,10 +159,13 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
     window.dispatchEvent(new Event(OPEN_EVENT));
     stateRef.current = 'closing';
     setState('closing');
+    // Just past the 0.45 s exit transition — long enough that the
+    // overlay is never unmounted mid-fade, short enough that it stops
+    // covering the invitation the moment it is invisible.
     window.setTimeout(() => {
       stateRef.current = 'closed';
       setState('closed');
-    }, 1300);
+    }, 520);
   };
 
   // The safety net only counts once playback has actually been started.
@@ -274,9 +282,10 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
         }`}
       />
 
-      {/* Whites the clip out at its end, so the hand-over is a fade from
-          white rather than a cut from the bright final frame. */}
-      <div aria-hidden className="intro-veil pointer-events-none absolute inset-0 bg-ivory" />
+      {/* Blooms over the clip at its end, so the hand-over is a flash of
+          light rather than a cut from the bright final frame. (Its own
+          gradient background lives in `.intro-veil`.) */}
+      <div aria-hidden className="intro-veil pointer-events-none absolute inset-0" />
 
       {/* Tapped, but no frame on screen yet — the clip is still
           buffering. Without this the message fades out and nothing
