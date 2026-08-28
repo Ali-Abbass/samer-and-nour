@@ -49,7 +49,7 @@ export function InvitationMessage({ content }: InvitationMessageProps) {
         </p>
 
         <p
-          className="script-names reveal flex flex-wrap items-baseline justify-center gap-x-3 text-[clamp(2.2rem,9.5vw,3.8rem)]"
+          className="script-names script-names--invite reveal flex flex-wrap items-baseline justify-center gap-x-3"
           style={{ '--reveal-delay': '560ms' } as React.CSSProperties}
         >
           <span className="gold-text">{content.groom}</span>

@@ -21,7 +21,7 @@ export function Hero({ content }: HeroProps) {
       <div aria-hidden className="hero-scrim absolute inset-x-0 bottom-0 h-[64%]" />
 
       <HeroEntrance>
-        <h1 className="he-names script-names text-[clamp(3rem,13.5vw,6.5rem)]">
+        <h1 className="he-names script-names script-names--hero">
           <span className="gold-text">{content.names}</span>
         </h1>
         <span aria-hidden className="he-rule block h-px w-14 bg-gold-deep/70" />

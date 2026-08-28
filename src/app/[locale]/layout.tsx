@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import { ASSETS, LOCALES, SITE_URL, isLocale } from '@/config/site';
 import { getContent } from '@/content';
-import { fontClassesByLocale } from './fonts';
+import { fontClassesByLocale, scriptScaleByLocale } from './fonts';
 import '../globals.css';
 
 interface LocaleLayoutProps {
@@ -76,7 +76,14 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const content = getContent(locale);
 
   return (
-    <html lang={locale} dir={content.dir} className={fontClassesByLocale[locale]}>
+    <html
+      lang={locale}
+      dir={content.dir}
+      className={fontClassesByLocale[locale]}
+      // Sizes for `.script-names` are all multiplied by this, so
+      // swapping the script face in fonts.ts needs no size edits.
+      style={{ '--script-scale': scriptScaleByLocale[locale] } as React.CSSProperties}
+    >
       <body>{children}</body>
     </html>
   );

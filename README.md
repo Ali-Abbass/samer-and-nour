@@ -74,12 +74,24 @@ Eastern Arabic numerals (٠١٢…).
   card uses `--ink` / `--stone` / `--gold-deep`, all ≥ 4.5:1 on paper.
   A full recolor is a one-file edit.
 - Fonts: `src/app/[locale]/fonts.ts`, three roles per locale —
-  *script* (the couple's names: Mishega / Aref Ruqaa for Arabic),
-  *display* (headings, dates, family names: Cormorant Garamond / Amiri)
-  and *body* (EB Garamond / IBM Plex Sans Arabic). Names use the
-  `.script-names` class (never add letter-spacing to it — it breaks the
-  connected script). Poetic lines use `.poem`: italic for Latin, upright
-  for Arabic.
+  *script* (the couple's names), *display* (headings, dates, family
+  names: Cormorant Garamond / Amiri) and *body* (EB Garamond / IBM Plex
+  Sans Arabic). Names use the `.script-names` class (never add
+  letter-spacing to it — it breaks the connected script). Poetic lines
+  use `.poem`: italic for Latin, upright for Arabic.
+- **Changing the English script face is a one-word edit**: set
+  `SCRIPT_FACE` in `fonts.ts` to any key of `SCRIPT_FACES` (currently
+  `mishega`, `corsiva`, `pinyon`, `italianno`, `petitFormal`). Arabic is
+  always Aref Ruqaa. Each face carries a `scale`, and the three script
+  sizes in `globals.css` are all multiplied by it via `--script-scale`,
+  so no size needs re-tuning by hand. The seeded scales normalise
+  *width* — every face sets "Samer & Nourhane" to the width Mishega
+  does, because the hero is one unwrapped line and width is what decides
+  whether it fits a narrow phone. Faces with a small x-height therefore
+  read daintier; nudge `scale` up and re-check the hero at ~390px wide,
+  the tightest case. To add a face, measure its advance for that string
+  and its worst swash overhang (must stay under the `0.26em` paint
+  padding on `.gold-text`).
 - Mishega is the one face not on Google Fonts. It is self-hosted via
   `next/font/local` from `src/fonts/Mishega.woff2` — a plain format
   conversion of the vendor `.otf`, not a subset, because its licence
@@ -92,6 +104,15 @@ Eastern Arabic numerals (٠١٢…).
   `fonts/` is gitignored, since this repo is public for Pages. Only the
   `.woff2` the build embeds is committed. Keep a copy of that download
   somewhere safe; it is not recoverable from this repo.
+- ⚠ **Monotype Corsiva is the one paid face.** It is the active script
+  face, self-hosted from `src/fonts/MonotypeCorsiva.woff2` and served to
+  every visitor, under a Monotype **webfont** licence held by the site
+  owner (confirmed 2026-08-28). The copy bundled with Office/Windows
+  does not allow this — its embedded notice limits use "to your
+  workstation … You may not copy or distribute this software", and the
+  permissive `fsType` bit covers document embedding only. **If you fork
+  this repo, you do not inherit that licence**: buy your own, or switch
+  `SCRIPT_FACE` to `italianno`, the nearest freely-licensable face here.
 
 ### The scroll experience
 

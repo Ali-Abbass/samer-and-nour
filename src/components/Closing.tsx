@@ -21,7 +21,7 @@ export function Closing({ content }: ClosingProps) {
         <Ornament delay="140ms" />
 
         <p
-          className="script-names reveal text-[clamp(2.6rem,11vw,4.2rem)]"
+          className="script-names script-names--closing reveal"
           style={{ '--reveal-delay': '280ms' } as React.CSSProperties}
         >
           <span className="gold-text">{content.monogram}</span>

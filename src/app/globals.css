@@ -244,12 +244,31 @@ html.overlay-open {
    Pinyon Script's connected letters must never be tracked, and its
    tall swashes need generous line-height and a little side padding so
    nothing clips. */
+/* The couple's names. Never add letter-spacing — it breaks the joins
+   of a connected script.
+
+   Sizes live here rather than on the elements so that switching the
+   script face is a one-word edit in fonts.ts: --script-scale is that
+   face's multiplier (the layout sets it per locale) and it rides on
+   all three sizes at once. Keep new script sizes in this pattern. */
 .script-names {
   font-family: var(--font-script);
   font-weight: 400;
   letter-spacing: 0;
   line-height: 1.3;
   padding-inline: 0.15em;
+  font-size: calc(var(--script-size) * var(--script-scale, 1));
+}
+/* The hero is the tightest fit: one unwrapped line, so it sets how far
+   any face's scale can go. Check it at ~390px wide. */
+.script-names--hero {
+  --script-size: clamp(3rem, 13.5vw, 6.5rem);
+}
+.script-names--invite {
+  --script-size: clamp(2.2rem, 9.5vw, 3.8rem);
+}
+.script-names--closing {
+  --script-size: clamp(2.6rem, 11vw, 4.2rem);
 }
 
 /* ─── Metallic gold text ─────────────────────────────────────────────── */
@@ -262,12 +281,16 @@ html.overlay-open {
   -webkit-text-fill-color: transparent;
   animation: gold-shimmer 9s ease-in-out infinite alternate;
   /* `background-clip: text` paints only inside this element's own box,
-     but Pinyon Script's swashes (the tail of a capital N, the flourish
+     but a script face's swashes (the tail of a capital N, the flourish
      under an S) reach well past the glyph advance width and the em box
      — anything outside would be filled with nothing and look sliced
      off. The padding grows the painted area; the matching negative
      margin takes the space straight back, so nothing moves. Keep the
-     two in step if either changes. */
+     two in step if either changes.
+
+     0.26em clears every face in SCRIPT_FACES: the worst overhang is
+     Corsiva's "S & N" at 0.206em. It is measured in em, so it tracks
+     --script-scale automatically. Re-measure if you add a face. */
   padding: 0.14em 0.26em;
   margin: -0.14em -0.26em;
 }
