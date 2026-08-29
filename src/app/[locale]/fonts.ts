@@ -41,11 +41,16 @@ const SCRIPT_FACE: ScriptFaceName = 'corsiva';
  * clamp() sizes by hand.
  *
  * The seeded numbers normalise *width*, not apparent size: each face
- * renders "Samer & Nourhane" at the same width Mishega does, because
- * that string is a single unwrapped line in the hero and width is what
- * decides whether it fits a narrow phone. Normalising x-height instead
- * would read more evenly but would push Pinyon and Italianno ~30% wider
- * than the hero can hold.
+ * sets "Samer & Nourhane" to the same total width Mishega does. That
+ * keeps the mass of the names and where the line breaks falls steady
+ * across faces, so a swap can't quietly reflow the hero. Normalising
+ * x-height instead would read more evenly between faces but would set
+ * Pinyon and Italianno ~30% wider, changing that balance.
+ *
+ * (The hero is not a single line: at 390px the English names wrap to
+ * "Samer &" / "Nourhane". Nothing here has to fit on one line — but no
+ * single *word* may outgrow the 342px between the px-6 gutters, which
+ * is the real ceiling on `scale`.)
  *
  * The cost is that faces with a small x-height look daintier at the
  * same width — the ratios are noted per face so you know which way to

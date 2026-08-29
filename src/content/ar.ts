@@ -26,6 +26,7 @@ export const ar: InvitationContent = {
   },
 
   hero: {
+    lead: 'حفل زفاف',
     names: 'سامر ونورهان',
     date: '٩ تشرين الأول ٢٠٢٦',
     imageAlt: 'سامر ونورهان يبتسمان أمام أقواس حجرية قديمة',
@@ -56,13 +57,13 @@ export const ar: InvitationContent = {
   },
 
   event: {
-    heading: 'احفظوا الموعد',
+    heading: 'ناطرينكم ب',
     date: '٩ تشرين الأول ٢٠٢٦',
-    time: 'الساعة ٧:٣٠ مساءً',
+    time: 'الساعة ٦:٣٠ مساءً',
   },
 
   venue: {
-    heading: 'المكان',
+    heading: 'مكان الحفل',
     name: 'سييلو سكاي فينيو',
     address: 'فندق بالاسيو، الطابق الثالث · الطريق البحري، الرميلة',
     openInMaps: 'افتحوا الموقع على الخرائط',
@@ -70,7 +71,7 @@ export const ar: InvitationContent = {
   },
 
   closing: {
-    line: 'بانتظار أن نفرح بلقائكم.',
+    line: 'حفل زفاف',
     monogram: 'سامر ونورهان',
     rsvp: 'تأكيد الحضور ضروري قبل ٢٠ أيلول',
   },

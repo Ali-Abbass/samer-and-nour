@@ -86,12 +86,14 @@ Eastern Arabic numerals (٠١٢…).
   sizes in `globals.css` are all multiplied by it via `--script-scale`,
   so no size needs re-tuning by hand. The seeded scales normalise
   *width* — every face sets "Samer & Nourhane" to the width Mishega
-  does, because the hero is one unwrapped line and width is what decides
-  whether it fits a narrow phone. Faces with a small x-height therefore
-  read daintier; nudge `scale` up and re-check the hero at ~390px wide,
-  the tightest case. To add a face, measure its advance for that string
-  and its worst swash overhang (must stay under the `0.26em` paint
-  padding on `.gold-text`).
+  does, which keeps the mass of the names and where the line breaks
+  falls steady across faces. (The hero is not one line: at 390px the
+  English names wrap to "Samer &" / "Nourhane". The ceiling on `scale`
+  is that no single *word* may outgrow the 342px between the gutters.)
+  Faces with a small x-height therefore read daintier; nudge `scale` up
+  and re-check the hero at ~390px wide, the tightest case. To add a
+  face, measure its advance for that string and its worst swash
+  overhang (must stay under the `0.26em` paint padding on `.gold-text`).
 - Mishega is the one face not on Google Fonts. It is self-hosted via
   `next/font/local` from `src/fonts/Mishega.woff2` — a plain format
   conversion of the vendor `.otf`, not a subset, because its licence

@@ -259,8 +259,10 @@ html.overlay-open {
   padding-inline: 0.15em;
   font-size: calc(var(--script-size) * var(--script-scale, 1));
 }
-/* The hero is the tightest fit: one unwrapped line, so it sets how far
-   any face's scale can go. Check it at ~390px wide. */
+/* The hero is the tightest fit and sets how far any face's scale can
+   go. On a 390px phone the English names wrap to two lines by design
+   ("Samer &" / "Nourhane"); what must not happen is a single word
+   outgrowing the 342px between the px-6 gutters. Check it there. */
 .script-names--hero {
   --script-size: clamp(3rem, 13.5vw, 6.5rem);
 }
@@ -636,6 +638,19 @@ html:not(.overlay-open) .ken-burns {
     transform: none;
   }
 }
+/* The lead-in inherits the h1's script line-height (1.3), which is far
+   too airy under a small caps line — pull the names back up under it so
+   the two read as one unit. `label-caps` also puts 0.3em after the last
+   letter; the padding-inline recentres it over the names. */
+.he-lead {
+  line-height: 1;
+  margin-bottom: 0.5em;
+  padding-inline-start: 0.3em;
+}
+[dir='rtl'] .he-lead {
+  padding-inline-start: 0;
+}
+
 .hero-entrance .he-names,
 .hero-entrance .he-date,
 .hero-entrance .he-rule {

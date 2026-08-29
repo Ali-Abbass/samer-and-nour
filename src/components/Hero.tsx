@@ -21,7 +21,14 @@ export function Hero({ content }: HeroProps) {
       <div aria-hidden className="hero-scrim absolute inset-x-0 bottom-0 h-[64%]" />
 
       <HeroEntrance>
+        {/* The lead-in sits inside the h1 so the heading reads whole —
+            "The wedding of Samer & Nourhane" — to a screen reader, and
+            so it rises with the names as one block rather than needing
+            its own entry in the entrance choreography below. */}
         <h1 className="he-names script-names script-names--hero">
+          <span className="he-lead label-caps block text-[clamp(0.66rem,2.3vw,0.8rem)] text-ink/75">
+            {content.lead}
+          </span>
           <span className="gold-text">{content.names}</span>
         </h1>
         <span aria-hidden className="he-rule block h-px w-14 bg-gold-deep/70" />

@@ -24,7 +24,7 @@ export function isLocale(value: string): value is Locale {
 }
 
 /** The wedding moment, with the Asia/Beirut UTC offset baked in. */
-export const WEDDING_DATE_ISO = '2026-10-09T19:30:00+03:00';
+export const WEDDING_DATE_ISO = '2026-10-09T18:30:00+03:00';
 
 export const VENUE = {
   name: 'Cielo Sky Venue',

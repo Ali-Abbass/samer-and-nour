@@ -23,6 +23,7 @@ export const en: InvitationContent = {
   },
 
   hero: {
+    lead: 'The wedding of',
     names: 'Samer & Nourhane',
     date: 'October 9, 2026',
     imageAlt: 'Samer and Nourhane smiling in front of old stone arches',
@@ -55,7 +56,7 @@ export const en: InvitationContent = {
   event: {
     heading: 'Save the evening',
     date: 'October 9, 2026',
-    time: '7:30 in the evening',
+    time: '6:30 in the evening',
   },
 
   venue: {

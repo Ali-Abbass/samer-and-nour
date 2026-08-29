@@ -26,6 +26,8 @@ export interface InvitationContent {
   };
 
   hero: {
+    /** Small lead-in above the names, e.g. "The wedding of". */
+    lead: string;
     names: string;
     date: string;
     imageAlt: string;
