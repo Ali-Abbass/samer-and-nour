@@ -521,47 +521,56 @@ html:not(.overlay-open) .ken-burns {
     focus-pull 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) both,
     ken-burns 32s ease-in-out infinite alternate;
 }
+/* Shallow on purpose: the dip used to go to 0.82, which was fine while
+   a pool of light sat behind the words. Without it the dim half of the
+   cycle was the weakest the instruction ever looks, so the floor came
+   up — still visibly breathing, never faint. */
 @keyframes tap-breathe {
   0%,
   100% {
-    opacity: 0.82;
+    opacity: 0.92;
   }
   50% {
     opacity: 1;
   }
 }
-/* No frame, no edge: the words sit in their own pool of ivory light,
-   densest behind the letters and fading to nothing well inside the
-   box. `closest-side` inscribes the ellipse in the padding box, so the
-   generous padding *is* the falloff — enlarge the padding to spread
-   the glow, not the gradient stops.
+/* Bare words on the clip — no pool of light, no halo, no frame. The
+   message sits low, below the envelope, where the first frame is plain
+   cream, so ink at full strength carries it on its own.
 
-   Deliberately no `backdrop-filter` here: it would blur a hard-edged
-   rounded rectangle out of the clip behind, which is exactly the edge
-   this is meant to avoid. Legibility comes from the glow plus the halo
-   on the letters themselves, and the breathing stays shallow (0.82,
-   not 0.6) so the words never fade toward illegible. */
+   No padding either: it used to exist only to shape the glow's falloff
+   (`closest-side` inscribed the ellipse in the padding box), and with
+   the glow gone it did nothing but squeeze the line into an awkward
+   two-line wrap. Without it the sentence fits one line.
+
+   The breathing stays — it is the only thing saying "this is
+   tappable" — and stays shallow (0.82, not 0.6) so the words never
+   fade toward illegible.
+
+   Worth knowing if the clip or its framing changes: the glow used to
+   be insurance for the message landing on a busy part of the frame.
+   That insurance is gone, so check the message against the first frame
+   on a short screen before changing where it sits. */
 .intro-tap {
-  background: radial-gradient(
-    ellipse closest-side,
-    rgba(238, 237, 235, 0.96),
-    /* The plateau runs out to 58% because the first and last letters
-       sit near 78% of the horizontal radius — an earlier falloff left
-       the ends of the line on almost no light. */
-    rgba(238, 237, 235, 0.92) 58%,
-    rgba(238, 237, 235, 0.52) 80%,
-    rgba(238, 237, 235, 0) 100%
-  );
-  text-shadow:
-    0 0 16px rgba(238, 237, 235, 0.95),
-    0 0 5px rgba(238, 237, 235, 0.9);
-  /* `label-caps` puts 0.3em after the last letter; the smaller end
-     padding takes it back so the text sits centred in the glow. */
-  padding: 1.5em 2.4em 1.5em 2.7em;
+  /* Heavier than the other caps labels (which stay at `label-caps`'
+     500). This one has no glow behind it and sits on a photograph, so
+     the weight is what carries it — and it is the one instruction a
+     guest has to notice. Both locales load 600 for this. */
+  font-weight: 600;
+  /* Slightly tighter than `label-caps`' 0.3em, and only here: at 600
+     the line is wide enough that 0.3em left it 4px from each edge on a
+     360px phone. 0.26em brings that back to 12px without reading as a
+     different kind of label. Arabic is untouched — `[dir='rtl']
+     .label-caps` zeroes tracking at a higher specificity, as it must,
+     since letter-spacing breaks the script. */
+  letter-spacing: 0.26em;
+  /* That tracking also lands after the last letter; taking it back on
+     the other side keeps the line optically centred. */
+  padding-inline-start: 0.26em;
   animation: tap-breathe 2.8s ease-in-out infinite;
 }
 [dir='rtl'] .intro-tap {
-  padding-inline: 2.55em;
+  padding-inline-start: 0;
 }
 /* No 300 ms double-tap-zoom wait, and no grey flash on the overlay. */
 .intro-tap-target {

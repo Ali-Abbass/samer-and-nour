@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
 
   // Lets the dev server be opened through an ngrok tunnel (e.g. for
   // testing on a phone). Only affects `npm run dev`, not production.
-  allowedDevOrigins: ['*.ngrok-free.app'],
+  allowedDevOrigins: ['*.ngrok-free.app', '192.168.10.131'],
 
   // NOTE: the old "/" → "/en" redirect() cannot exist in a static export
   // (there is no server). public/index.html does that job instead.

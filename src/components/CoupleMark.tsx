@@ -24,7 +24,7 @@ export function CoupleMark({ delay = '0ms', className = '' }: CoupleMarkProps) {
     <svg
       aria-hidden
       viewBox="0 0 300 950"
-      className={`reveal w-auto text-gold-deep ${className}`}
+      className={`reveal w-auto text-gold ${className}`}
       style={{ '--reveal-delay': delay } as React.CSSProperties}
     >
       <g transform="translate(0,950) scale(.1,-.1)" stroke="none">

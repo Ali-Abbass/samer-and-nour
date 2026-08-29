@@ -310,7 +310,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
         onClick={() => start(true)}
         disabled={!waiting}
         aria-hidden={!waiting}
-        className={`intro-tap-target absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[18svh] transition-opacity duration-500 ${
+        className={`intro-tap-target absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[5svh] transition-opacity duration-500 ${
           waiting ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >

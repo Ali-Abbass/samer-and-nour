@@ -162,7 +162,9 @@ const cormorant = Cormorant_Garamond({
 });
 
 const ebGaramond = EB_Garamond({
-  weight: ['400', '500'],
+  // 600 is used only by the intro's "tap to open" message, which has no
+  // glow behind it any more and carries itself on weight alone.
+  weight: ['400', '500', '600'],
   style: ['normal', 'italic'],
   subsets: ['latin'],
   display: 'swap',
@@ -186,7 +188,11 @@ const amiri = Amiri({
 });
 
 const plexArabic = IBM_Plex_Sans_Arabic({
-  weight: ['300', '400'],
+  // 500 backs `.label-caps`, which asked for it while only 300/400 were
+  // loaded — every caps label in Arabic was quietly rendering at 400.
+  // 600 is the intro message, matching EB Garamond's 600 on the English
+  // side so the two locales read with the same emphasis.
+  weight: ['300', '400', '500', '600'],
   subsets: ['arabic'],
   display: 'swap',
   variable: '--font-body-family',
