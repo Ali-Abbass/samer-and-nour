@@ -14,7 +14,7 @@ export const en: InvitationContent = {
     title: 'Samer & Nourhane · October 9, 2026',
     description:
       'Because love is where every story begins — join us in celebrating the marriage of Samer & Nourhane. October 9, 2026 · Cielo Sky Venue, Rmeileh.',
-    ogImageAlt: 'Samer and Nourhane smiling together under the trees at sunset',
+    ogImageAlt: 'Samer and Nourhane in formal dress, smiling at each other',
   },
 
   intro: {
