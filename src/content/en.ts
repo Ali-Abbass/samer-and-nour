@@ -26,7 +26,7 @@ export const en: InvitationContent = {
     lead: 'The wedding of',
     names: 'Samer & Nourhane',
     date: 'October 9, 2026',
-    imageAlt: 'Samer and Nourhane smiling in front of old stone arches',
+    imageAlt: 'Samer and Nourhane in formal dress, smiling at each other',
     scrollCue: 'Scroll to open your invitation',
   },
 

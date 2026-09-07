@@ -62,11 +62,19 @@ export function withBasePath(path: string): string {
 }
 
 export const ASSETS = {
-  /** Backdrop photo. Replace the file at this path to swap it. The
-   *  white-gold theme lays ivory cards over it, so it wants the bright,
-   *  untouched original (the pre-darkened hero.jpg suited the old dark
-   *  theme and is kept for reference). */
-  heroImage: withBasePath('/images/hero-original.jpg'),
+  /** Backdrop photo. Replace the file at this path to swap it.
+   *
+   *  It is a crop, not the camera original: BackgroundImage covers a box
+   *  118% of the viewport tall and Ken Burns zooms it 1.02–1.10, so what
+   *  matters is where the faces sit *within the file*. At ~30% down they
+   *  land above the cards at every zoom and on desktop, where the crop
+   *  flips to horizontal. Framed too tight and the 1.10 end of the zoom
+   *  clips the tops of their heads.
+   *
+   *  `design/hero-source.jpg` is the untouched original to re-crop from;
+   *  `design/hero-previous.jpg` is the backdrop this replaced. Both live
+   *  outside public/ so neither is served. */
+  heroImage: withBasePath('/images/hero.jpg'),
   /** Optional extra section backgrounds (unused in v1, wired for later). */
   sectionImages: [] as string[],
   /** 1200×630 image used for WhatsApp / social link previews.
