@@ -7,7 +7,14 @@
   --ivory: #eeedeb; /* soft white — haze, scrims, glass pills */
   --paper: #ebe8e1; /* the card */
   --champagne: #bfa78d; /* frames, hairlines */
-  --gold: #c9a04e; /* metallic mid-tone */
+  --gold: #c9a04e; /* metallic mid-tone — the photo grade */
+  /* The gold the couple's names and their mark are drawn in. Same hue
+     and saturation as --gold, dropped in lightness until it clears 3:1
+     on paper (3.52:1) — --gold itself is only 1.99:1, which left the
+     names faint on the cards. It also sits close to the #8D6D02 of
+     their original artwork, so this is a step back toward it, not away.
+     Not --gold-deep (5:1): that reads brown rather than gold. */
+  --gold-ink: #98742e;
   --gold-deep: #7d5c25; /* gold that stays readable on paper (5:1) */
   --ink: #2a2521; /* warm charcoal text */
   --stone: #6b6258; /* secondary text (4.9:1 on paper) */
@@ -50,6 +57,7 @@
   --color-paper: var(--paper);
   --color-champagne: var(--champagne);
   --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-gold-deep: var(--gold-deep);
   --color-ink: var(--ink);
   --color-stone: var(--stone);
@@ -309,7 +317,7 @@ html.overlay-open {
    nothing to clip and nothing to pad. Do not reintroduce the padding —
    it only ever existed to serve the gradient. */
 .gold-text {
-  color: var(--gold);
+  color: var(--gold-ink);
 }
 
 /* Ivory glass pills pinned to the top corners (language, mute). */

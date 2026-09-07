@@ -13,8 +13,8 @@ interface CoupleMarkProps {
  * Two layers, as the original is drawn: the champagne one sits behind
  * and slightly off-register, the gold one on top. Recoloured onto the
  * site palette rather than the artwork's own #8D6D02/#C9BD9A — the
- * stroke takes `currentColor` (gold-deep here, the gold that holds 5:1
- * on paper) so it matches the Ornament and any card it is dropped into.
+ * stroke takes `currentColor` (--gold-ink, the same gold the couple's
+ * names are set in) so the mark and the names read as one piece.
  *
  * Decorative: the names sit next to it as real text, so this is
  * aria-hidden rather than labelled, which would only stutter.
@@ -24,7 +24,7 @@ export function CoupleMark({ delay = '0ms', className = '' }: CoupleMarkProps) {
     <svg
       aria-hidden
       viewBox="0 0 300 950"
-      className={`reveal w-auto text-gold ${className}`}
+      className={`reveal w-auto text-gold-ink ${className}`}
       style={{ '--reveal-delay': delay } as React.CSSProperties}
     >
       <g transform="translate(0,950) scale(.1,-.1)" stroke="none">
