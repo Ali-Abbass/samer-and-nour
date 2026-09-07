@@ -23,12 +23,11 @@ export function LanguageToggle({ locale, toggle }: LanguageToggleProps) {
   const switchLocale = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     // Ask the sections where they are rather than dividing scrollY by
-    // the viewport. The two are not the same ruler: sections are sized
-    // in `svh` (fixed at the smallest viewport) while innerHeight moves
-    // with iOS Safari's toolbars, and one section is taller than a
-    // screen — so the division drifts and lands the guest on the wrong
-    // scene. Whichever section covers the middle of the screen is the
-    // one being read.
+    // the viewport. Sections track the viewport now (`100dvh`), but the
+    // division still drifts: one section is taller than a screen, and a
+    // section can grow past a screen whenever its card does. Geometry
+    // cannot drift — whichever section covers the middle of the screen
+    // is the one being read.
     const middle = window.innerHeight / 2;
     const current = Array.from(document.querySelectorAll<HTMLElement>('.snap-section')).find(
       (section) => {
