@@ -155,6 +155,12 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
   const finish = () => {
     if (finishedRef.current) return;
     finishedRef.current = true;
+    // The hand-over must reveal the top of the hero. The overlay has
+    // been covering the page, so anything that moved it underneath —
+    // a stray touch, a restored offset the layout script did not catch
+    // — would otherwise show as the invitation opening halfway down.
+    // A `#s…` hash is a deliberate destination, so it is respected.
+    if (!window.location.hash) window.scrollTo(0, 0);
     sessionStorage.setItem(OPENED_KEY, 'true');
     window.dispatchEvent(new Event(OPEN_EVENT));
     stateRef.current = 'closing';

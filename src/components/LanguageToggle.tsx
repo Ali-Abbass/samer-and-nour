@@ -22,8 +22,21 @@ export function LanguageToggle({ locale, toggle }: LanguageToggleProps) {
 
   const switchLocale = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    const sectionIndex = Math.round(window.scrollY / window.innerHeight);
-    const hash = sectionIndex > 0 ? `#s${sectionIndex}` : '';
+    // Ask the sections where they are rather than dividing scrollY by
+    // the viewport. The two are not the same ruler: sections are sized
+    // in `svh` (fixed at the smallest viewport) while innerHeight moves
+    // with iOS Safari's toolbars, and one section is taller than a
+    // screen — so the division drifts and lands the guest on the wrong
+    // scene. Whichever section covers the middle of the screen is the
+    // one being read.
+    const middle = window.innerHeight / 2;
+    const current = Array.from(document.querySelectorAll<HTMLElement>('.snap-section')).find(
+      (section) => {
+        const { top, bottom } = section.getBoundingClientRect();
+        return top <= middle && bottom > middle;
+      },
+    );
+    const hash = current && current.id !== 's0' ? `#${current.id}` : '';
     router.push(`/${target}${hash}`);
   };
 

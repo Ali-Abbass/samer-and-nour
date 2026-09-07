@@ -84,7 +84,30 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       // swapping the script face in fonts.ts needs no size edits.
       style={{ '--script-scale': scriptScaleByLocale[locale] } as React.CSSProperties}
     >
-      <body>{children}</body>
+      <body>
+        {/* Runs before hydration, and before the browser would restore a
+            scroll offset of its own.
+
+            Reopening the link (a tap from WhatsApp, a reload, a return
+            to the tab) otherwise lands the guest at the pixel offset
+            they left at. That offset was measured against whatever the
+            viewport height was then — and iOS Safari's viewport changes
+            with its toolbars — so on the way back it rarely lines up
+            with a section boundary any more. The intro covers it, and
+            when the intro lifts the guest is stranded between two
+            scenes; `scroll-snap-stop: always` then makes it a fight to
+            get back, because each flick advances only one section.
+
+            The `#s…` hash from the language toggle is a deliberate
+            destination, so it is left alone. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';if(!location.hash)window.scrollTo(0,0);}catch(e){}})();",
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

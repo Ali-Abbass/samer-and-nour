@@ -96,9 +96,17 @@ body {
   min-height: 100svh;
 }
 
-/* Lock scrolling while the opening overlay is up. */
+/* Lock scrolling while the opening overlay is up.
+
+   `overflow: hidden` alone does not hold: the page can still be moved
+   under the overlay (measured — a scroll during the clip left the hero
+   entrance playing off-screen). `touch-action: none` is what actually
+   stops a finger on iOS; the tap target re-enables its own gestures
+   with `touch-action: manipulation`, so opening still works. */
 html.overlay-open {
   overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 /* ─── Scene layout ────────────────────────────────────────────────────
