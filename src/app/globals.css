@@ -297,35 +297,19 @@ html.overlay-open {
 }
 
 /* ─── Metallic gold text ─────────────────────────────────────────────── */
-.gold-text {
-  background: var(--gold-gradient);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  animation: gold-shimmer 9s ease-in-out infinite alternate;
-  /* `background-clip: text` paints only inside this element's own box,
-     but a script face's swashes (the tail of a capital N, the flourish
-     under an S) reach well past the glyph advance width and the em box
-     — anything outside would be filled with nothing and look sliced
-     off. The padding grows the painted area; the matching negative
-     margin takes the space straight back, so nothing moves. Keep the
-     two in step if either changes.
+/* The couple's names, in the flat gold of their calligraphic mark, so
+   the two read as one piece rather than two different golds.
 
-     0.26em clears every face in SCRIPT_FACES: the worst overhang is
-     Corsiva's "S & N" at 0.206em. It is measured in em, so it tracks
-     --script-scale automatically. Re-measure if you add a face. */
-  padding: 0.14em 0.26em;
-  margin: -0.14em -0.26em;
-}
-@keyframes gold-shimmer {
-  from {
-    background-position: 0% 50%;
-  }
-  to {
-    background-position: 100% 50%;
-  }
+   This used to be `--gold-gradient` clipped to the text and drifted by
+   a `gold-shimmer` animation. All of that machinery is gone with it:
+   `background-clip: text` paints only inside the element's own box, so
+   it needed 0.26em of padding (cancelled by a matching negative margin)
+   to stop a script face's swashes being sliced off at the box edge. A
+   solid colour fills the glyphs wherever they reach, so there is
+   nothing to clip and nothing to pad. Do not reintroduce the padding —
+   it only ever existed to serve the gradient. */
+.gold-text {
+  color: var(--gold);
 }
 
 /* Ivory glass pills pinned to the top corners (language, mute). */
@@ -751,7 +735,6 @@ html:not(.overlay-open) .ken-burns {
   .cue-chevron,
   .soft-rise,
   .digit-in,
-  .gold-text,
   .intro-tap,
   /* The dots stay put and fully visible — still a "working on it"
      sign, just without the bouncing. */
