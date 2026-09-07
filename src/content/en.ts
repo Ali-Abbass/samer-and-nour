@@ -11,9 +11,12 @@ export const en: InvitationContent = {
   useArabicNumerals: false,
 
   meta: {
-    title: 'Samer & Nourhane · October 9, 2026',
-    description:
-      'Because love is where every story begins — join us in celebrating the marriage of Samer & Nourhane. October 9, 2026 · Cielo Sky Venue, Rmeileh.',
+    title: 'Wedding of Samer & Nourhane',
+    // The newline is deliberate: WhatsApp and iMessage render it as a
+    // line break in the preview card, so the date and the venue read as
+    // two lines rather than one run-on sentence. Anywhere that strips it
+    // simply falls back to a space.
+    description: 'October 9, 2026\n📍Cielo Sky Venue, Rmeileh',
     ogImageAlt: 'Samer and Nourhane in formal dress, smiling at each other',
   },
 
