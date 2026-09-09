@@ -106,6 +106,33 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
               "(function(){try{if('scrollRestoration' in history)history.scrollRestoration='manual';if(!location.hash)window.scrollTo(0,0);}catch(e){}})();",
           }}
         />
+
+        {/* Viewport height, measured rather than trusted.
+
+            iOS Safari and the in-app browsers built on WebKit resolve
+            viewport units against their own model of their chrome, not
+            the area they actually paint into. Measured in WhatsApp's
+            browser, `100dvh` came up 9% short, so each section ended
+            above the fold and a band of the next scene showed beneath
+            it. svh and lvh come from the same model and are no better.
+
+            This compares a live `100dvh` probe against the real height
+            and publishes `--app-vh` only when the two disagree. Where
+            dvh is already correct — Chrome, Android — the difference is
+            zero, the property is never set, and the CSS falls back to
+            plain dvh, so nothing changes for them.
+
+            innerHeight, not visualViewport.height: the latter also
+            shrinks on pinch-zoom, which would wrongly resize the page.
+            visualViewport's resize event is still the reliable signal
+            that the toolbar moved, so it is listened to for the trigger
+            while innerHeight remains the measurement. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var d=document.documentElement;function sync(){try{var p=document.createElement('div');p.style.cssText='position:fixed;top:0;left:0;width:0;height:100dvh;visibility:hidden;pointer-events:none';d.appendChild(p);var unit=p.getBoundingClientRect().height;p.remove();var real=window.innerHeight;if(unit&&Math.abs(real-unit)>2){d.style.setProperty('--app-vh',real+'px');}else{d.style.removeProperty('--app-vh');}}catch(e){}}sync();addEventListener('resize',sync,{passive:true});addEventListener('orientationchange',sync);if(window.visualViewport){visualViewport.addEventListener('resize',sync,{passive:true});}})();",
+          }}
+        />
         {children}
       </body>
     </html>

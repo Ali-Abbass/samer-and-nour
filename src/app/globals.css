@@ -109,14 +109,19 @@ body {
      up 128px short and the 17% below it showed the next scene's bare
      backdrop, with the scrim's edge drawn across the screen.
 
-     `dvh` is the viewport as it actually is now, so the section always
-     fills it, in-app browser or not. Do not put `svh` back.
+     `dvh` is the viewport as it actually is now — correct in Chrome and
+     on Android, and still wrong in iOS Safari and the in-app browsers
+     built on WebKit, which resolve viewport units against their own
+     model of their chrome rather than the area they paint into.
+     Measured in WhatsApp's browser: dvh came up 9% short of the painted
+     height, leaving a band of the next scene below the hero. No choice
+     of svh/dvh/lvh fixes that — all three come from the same model.
 
-     A duplicated `min-height: 100svh` fallback was tried first and is
-     pointless here: the build strips it, having decided dvh is safe for
-     the browsers this targets (Safari 15.4+, Chrome 108+). Check the
-     built CSS before adding one back. */
-  min-height: 100dvh;
+     So `--app-vh` overrides it: a script in the layout compares a live
+     100dvh probe against the real height and sets this only when they
+     disagree, which makes it a no-op wherever dvh is already right.
+     The dvh here is the fallback for before that script runs. */
+  min-height: var(--app-vh, 100dvh);
 }
 
 /* Lock scrolling while the opening overlay is up.
@@ -138,7 +143,7 @@ html.overlay-open {
    stays visible above even a short card; a tall card simply grows the
    scene past one viewport (mandatory snap still lets you scroll it). */
 .scene {
-  padding-top: 34dvh;
+  padding-top: calc(0.34 * var(--app-vh, 100dvh));
   padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
 }
 /* Wider screens crop the photo to landscape, so the "photo above,
@@ -146,8 +151,8 @@ html.overlay-open {
 @media (min-width: 640px) {
   .scene {
     justify-content: center;
-    padding-top: 6dvh;
-    padding-bottom: 6dvh;
+    padding-top: calc(0.06 * var(--app-vh, 100dvh));
+    padding-bottom: calc(0.06 * var(--app-vh, 100dvh));
   }
 }
 
@@ -210,7 +215,7 @@ html.overlay-open {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 50dvh;
+  min-height: calc(0.5 * var(--app-vh, 100dvh));
   padding: calc(var(--torn-edge) + 1.5rem) 1.6rem;
   /* Grain on top, then the sheen, then the ivory sheet. */
   background:
