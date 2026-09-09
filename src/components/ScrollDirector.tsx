@@ -8,8 +8,10 @@ const PARALLAX = 0.07;
 const VEIL_MAX = 0.42;
 /** Extra distance (in viewport heights) a card rises from as it enters. */
 const RISE = 0.12;
-/** How much a card shrinks as it recedes off the top. */
-const SHRINK = 0.08;
+/** How much a card shrinks as it recedes off the top. Gentle on
+ *  purpose: this is the "zoom" you notice on a fast flick, and it is
+ *  compressed into the snap's few frames however fast you scroll. */
+const SHRINK = 0.05;
 
 /**
  * One passive scroll loop that "directs" the cinematic motion:
