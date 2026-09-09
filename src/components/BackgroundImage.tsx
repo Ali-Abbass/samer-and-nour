@@ -14,8 +14,25 @@ import { ASSETS } from '@/config/site';
  *     a background while the cards take the stage.
  */
 export function BackgroundImage() {
+  /* `h-[100lvh]`, not `inset-0`. A fixed element with `inset-0` is as
+     tall as the *current* viewport, so when iOS retracts its toolbar on
+     the first scroll the box grows and `object-cover` re-scales the
+     photo to cover it — measured at 20.6% larger, arriving in the moment
+     the toolbar animates. Five times the whole Ken Burns travel, in a
+     fraction of a second, which is what read as the photo zooming the
+     instant you started scrolling.
+
+     The large viewport height is fixed at the toolbar-retracted size, so
+     nothing re-crops: with the toolbar up the backdrop simply extends
+     behind it, and retracting it reveals more of a photo that was
+     already the right size.
+
+     Note this is the opposite of what `.snap-section` needs. Sections
+     must fill the *visible* area (100dvh) or a band of the next scene
+     shows below them; the backdrop must ignore it. Same viewport
+     problem, opposite answers — don't unify them. */
   return (
-    <div aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-paper">
+    <div aria-hidden className="fixed inset-x-0 top-0 h-[100lvh] -z-10 overflow-hidden bg-paper">
       <div id="backdrop-motion" className="absolute inset-x-0 -top-[9%] -bottom-[9%]">
         <div className="ken-burns absolute inset-0">
           {/* Not `priority`: the photo is hidden behind the intro video at
