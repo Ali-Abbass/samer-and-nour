@@ -442,13 +442,23 @@ html.overlay-open {
   transform: scaleX(1);
 }
 
-/* ─── Backdrop Ken Burns drift ────────────────────────────────────── */
+/* ─── Backdrop Ken Burns drift ──────────────────────────────────────
+   4% of travel, not the 8% this used to run. The cycle and its easing
+   are unchanged; only the distance halved.
+
+   Worth knowing before widening it again: `ease-in-out` over a 32s
+   alternate is not a constant drift. It is nearly still at both ends
+   and about twice its average rate through the middle, so a guest who
+   opens the invitation mid-cycle meets the fastest part of it. At 8%
+   that peak was ~0.50%/s and read as a quick zoom; halving the travel
+   halves the peak to ~0.25%/s. Duration is the other lever — going
+   `linear` removes the fast stretch altogether. */
 @keyframes ken-burns {
   from {
     transform: scale(1.02);
   }
   to {
-    transform: scale(1.1);
+    transform: scale(1.06);
   }
 }
 .ken-burns {
