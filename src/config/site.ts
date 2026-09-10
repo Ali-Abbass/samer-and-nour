@@ -28,18 +28,29 @@ export const WEDDING_DATE_ISO = '2026-10-09T18:30:00+03:00';
 
 export const VENUE = {
   name: 'Cielo Sky Venue',
-  /** Query used for the "Open in Google Maps" button and the embed. */
+  /** Human-readable location. Shown to nobody — kept as the record of
+   *  what the coordinates below refer to. It is deliberately NOT used
+   *  for the map any more: Google does not resolve this string, so both
+   *  the button and the embed were sending guests to a search that
+   *  found nothing. */
   mapQuery: 'Cielo Sky Venue, Palacio Hotel, Rmeileh, Lebanon',
-  // TODO: replace with the exact Google place ID once you have the pin
-  // (open the venue on Google Maps → share → copy the place ID).
+  // A plus code, not a Google place ID. With a real one the map could
+  // show a named place card instead of a bare pin — unused until then.
   placeId: 'JC62+WP3 Rmeileh',
-  /** Drives the embedded map's pin. Confirm against the real venue
-   *  before the invitation goes out — a wrong pin misdirects guests. */
+  /** The venue pin, confirmed by the owner on 2026-09-10. Both the
+   *  embedded map and the "Open in Google Maps" button are built from
+   *  these, so a wrong value here misdirects every guest. */
   coordinates: { lat: 33.6122513, lng: 35.4018086 },
 } as const;
 
+/** Where the "Open in Google Maps" button goes. Coordinates rather than
+ *  the venue's name, for the same reason the embed uses them: the name
+ *  does not resolve, so a guest tapping this landed on an empty search
+ *  instead of the venue. A lat/lng lands exactly on the spot and offers
+ *  directions straight away. Google's documented Maps URL form, so it
+ *  opens the app where one is installed and the web where it is not. */
 export const MAPS_SEARCH_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  VENUE.mapQuery,
+  `${VENUE.coordinates.lat},${VENUE.coordinates.lng}`,
 )}`;
 
 /** Key-less embed, pinned by coordinates rather than by name.
