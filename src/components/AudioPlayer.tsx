@@ -11,7 +11,7 @@ const FADE_MS = 2000;
 /** Silence between the track ending and starting again. */
 const REPLAY_GAP_MS = 1000;
 /** Ramp down over the track's last moments so the repeat has no edge. */
-const FADE_OUT_MS = 2500;
+const FADE_OUT_MS = 3000;
 
 /**
  * The audio element lives at module scope, outside React: switching
@@ -87,19 +87,81 @@ function getAudio(): HTMLAudioElement {
  */
 export function primeAudio() {
   const audio = getAudio();
+  ensureGraph(audio);
   if (!audio.paused) return;
   audio.muted = true;
   audio.play().catch(() => undefined);
 }
 
 /**
- * Ramps the volume to `to` over `ms`. Each call supersedes the one
+ * Routes the element through a gain node, because on iOS
+ * `HTMLMediaElement.volume` is read-only — the volume there belongs to
+ * the hardware buttons, assignments are ignored and reads always give
+ * back 1. Every fade in this file was therefore silent on iPhones. A
+ * GainNode is scriptable on every platform, so the fades run through it
+ * instead and `volume` is left alone at 1.
+ *
+ * Built lazily from a user gesture: iOS starts an AudioContext
+ * suspended, and only a gesture may resume it. Once an element has been
+ * given a MediaElementAudioSource it must stay connected to a
+ * destination or it goes silent, which is why the graph is wired in one
+ * step and the node kept for the life of the page.
+ */
+let audioCtx: AudioContext | null = null;
+let gainNode: GainNode | null = null;
+
+function ensureGraph(audio: HTMLAudioElement): GainNode | null {
+  if (gainNode) {
+    if (audioCtx?.state === 'suspended') void audioCtx.resume();
+    return gainNode;
+  }
+  const Ctor =
+    window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!Ctor) return null;
+  try {
+    audioCtx = new Ctor();
+    const source = audioCtx.createMediaElementSource(audio);
+    gainNode = audioCtx.createGain();
+    // Start silent: the first thing to happen is always a fade in.
+    gainNode.gain.value = 0;
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    // The element's own volume is now a second attenuation in series;
+    // pin it open so gain is the only thing shaping the level.
+    audio.volume = 1;
+    void audioCtx.resume();
+    return gainNode;
+  } catch {
+    // Already sourced, or the context was refused. Fall back to volume,
+    // which still works everywhere except iOS.
+    return null;
+  }
+}
+
+/**
+ * Ramps the level to `to` over `ms`. Each call supersedes the one
  * before it — without that, a fade-out still in flight when the track
- * restarts would keep pulling the volume back down against the fade-in.
+ * restarts would keep pulling the level back down against the fade-in.
+ *
+ * Through the gain node this is one scheduled ramp rather than a
+ * per-frame loop, so it also runs to completion whether or not the page
+ * is painting.
  */
 let rampToken = 0;
 function ramp(audio: HTMLAudioElement, to: number, ms: number) {
   const token = ++rampToken;
+  const gain = ensureGraph(audio);
+
+  if (gain && audioCtx) {
+    const now = audioCtx.currentTime;
+    gain.gain.cancelScheduledValues(now);
+    gain.gain.setValueAtTime(gain.gain.value, now);
+    gain.gain.linearRampToValueAtTime(to, now + ms / 1000);
+    return;
+  }
+
+  // No Web Audio: drive the element's own volume, which works
+  // everywhere except iOS — the platform this exists to fix.
   const from = audio.volume;
   const startedAt = performance.now();
   const step = (now: number) => {
@@ -112,7 +174,13 @@ function ramp(audio: HTMLAudioElement, to: number, ms: number) {
 }
 
 function fadeIn(audio: HTMLAudioElement) {
-  audio.volume = 0;
+  const gain = ensureGraph(audio);
+  if (gain && audioCtx) {
+    gain.gain.cancelScheduledValues(audioCtx.currentTime);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+  } else {
+    audio.volume = 0;
+  }
   ramp(audio, TARGET_VOLUME, FADE_MS);
 }
 
