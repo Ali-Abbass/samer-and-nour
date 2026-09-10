@@ -10,6 +10,8 @@ const TARGET_VOLUME = 0.35;
 const FADE_MS = 2000;
 /** Silence between the track ending and starting again. */
 const REPLAY_GAP_MS = 1000;
+/** Ramp down over the track's last moments so the repeat has no edge. */
+const FADE_OUT_MS = 2500;
 
 /**
  * The audio element lives at module scope, outside React: switching
@@ -28,6 +30,25 @@ function getAudio(): HTMLAudioElement {
     // driven from `ended` instead.
     audio.loop = false;
     audio.preload = 'auto';
+
+    // Bring the volume down over the closing seconds so the track
+    // arrives at silence instead of being cut off at it. Driven from
+    // `timeupdate`, which only fires a few times a second — that is
+    // fine as a trigger, since the ramp itself then runs on rAF.
+    let fadingOut = false;
+    audio.addEventListener('timeupdate', () => {
+      // `audio.ended` matters here. A `timeupdate` still queued from the
+      // end of the track lands after the repeat starts, and it reports
+      // currentTime at the duration — which re-arms the fade-out and
+      // supersedes the fade back in, leaving the music silently
+      // "playing" at volume 0 for good. Measured, not theorised.
+      if (fadingOut || audio.ended || !Number.isFinite(audio.duration)) return;
+      if (audio.duration - audio.currentTime <= FADE_OUT_MS / 1000) {
+        fadingOut = true;
+        ramp(audio, 0, FADE_OUT_MS);
+      }
+    });
+
     audio.addEventListener('ended', () => {
       window.setTimeout(() => {
         // The tab may have gone away during the silence. Starting
@@ -39,7 +60,17 @@ function getAudio(): HTMLAudioElement {
           return;
         }
         audio.currentTime = 0;
-        audio.play().catch(() => undefined);
+        // Fade back up rather than snapping to full: the ending faded
+        // to nothing, so a hard start would put the edge back.
+        audio
+          .play()
+          .then(() => {
+            // Cleared only once the track is genuinely running again, so
+            // nothing can re-arm the fade during the silence.
+            fadingOut = false;
+            fadeIn(audio);
+          })
+          .catch(() => undefined);
       }, REPLAY_GAP_MS);
     });
     // The element is module scope and never torn down, so this listener
@@ -61,15 +92,28 @@ export function primeAudio() {
   audio.play().catch(() => undefined);
 }
 
-function fadeIn(audio: HTMLAudioElement) {
-  audio.volume = 0;
+/**
+ * Ramps the volume to `to` over `ms`. Each call supersedes the one
+ * before it — without that, a fade-out still in flight when the track
+ * restarts would keep pulling the volume back down against the fade-in.
+ */
+let rampToken = 0;
+function ramp(audio: HTMLAudioElement, to: number, ms: number) {
+  const token = ++rampToken;
+  const from = audio.volume;
   const startedAt = performance.now();
   const step = (now: number) => {
-    const progress = Math.min((now - startedAt) / FADE_MS, 1);
-    audio.volume = TARGET_VOLUME * progress;
+    if (token !== rampToken) return;
+    const progress = Math.min((now - startedAt) / ms, 1);
+    audio.volume = from + (to - from) * progress;
     if (progress < 1 && !audio.paused) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
+}
+
+function fadeIn(audio: HTMLAudioElement) {
+  audio.volume = 0;
+  ramp(audio, TARGET_VOLUME, FADE_MS);
 }
 
 interface AudioPlayerProps {
