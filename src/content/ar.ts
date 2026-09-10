@@ -11,12 +11,12 @@ import type { InvitationContent } from './types';
 export const ar: InvitationContent = {
   locale: 'ar',
   dir: 'rtl',
-  useArabicNumerals: false,
+  useArabicNumerals: true,
 
   meta: {
     title: 'حفل زفاف سامر و نورهان',
     description: '٩ تشرين الأول ٢٠٢٦\n\n📍سييلو سكاي فينيو، الرميلة',
-    ogImageAlt: 'سامر ونورهان بثياب السهرة يتبادلان الابتسام',
+    ogImageAlt: 'سامر يقبّل جبين نورهان على الشاطئ عند الغروب',
   },
 
   intro: {
@@ -28,7 +28,7 @@ export const ar: InvitationContent = {
     lead: 'حفل زفاف',
     names: 'سامر ونورهان',
     date: '٩ تشرين الأول ٢٠٢٦',
-    imageAlt: 'سامر ونورهان بثياب السهرة يتبادلان الابتسام',
+    imageAlt: 'سامر يقبّل جبين نورهان على الشاطئ عند الغروب',
     scrollCue: 'مرّروا للأسفل لفتح الدعوة',
   },
 

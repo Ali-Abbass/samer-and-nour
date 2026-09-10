@@ -17,7 +17,7 @@ export const en: InvitationContent = {
     // two lines rather than one run-on sentence. Anywhere that strips it
     // simply falls back to a space.
     description: 'October 9, 2026\n📍Cielo Sky Venue, Rmeileh',
-    ogImageAlt: 'Samer and Nourhane in formal dress, smiling at each other',
+    ogImageAlt: 'Samer kissing Nourhane on the forehead on a beach at sunset',
   },
 
   intro: {
@@ -29,7 +29,7 @@ export const en: InvitationContent = {
     lead: 'The wedding of',
     names: 'Samer & Nourhane',
     date: 'October 9, 2026',
-    imageAlt: 'Samer and Nourhane in formal dress, smiling at each other',
+    imageAlt: 'Samer kissing Nourhane on the forehead on a beach at sunset',
     scrollCue: 'Scroll to open your invitation',
   },
 

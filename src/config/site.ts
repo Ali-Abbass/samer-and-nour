@@ -33,7 +33,8 @@ export const VENUE = {
   // TODO: replace with the exact Google place ID once you have the pin
   // (open the venue on Google Maps → share → copy the place ID).
   placeId: 'JC62+WP3 Rmeileh',
-  // TODO: replace with the exact coordinates of the venue pin. (33.6122513, 35.4018086)
+  /** Drives the embedded map's pin. Confirm against the real venue
+   *  before the invitation goes out — a wrong pin misdirects guests. */
   coordinates: { lat: 33.6122513, lng: 35.4018086 },
 } as const;
 
@@ -41,11 +42,19 @@ export const MAPS_SEARCH_URL = `https://www.google.com/maps/search/?api=1&query=
   VENUE.mapQuery,
 )}`;
 
-/** Key-less embed URL derived from the query. Swap for a place-ID based
- *  embed later if you want the exact pin. */
-export const MAPS_EMBED_URL = `https://www.google.com/maps?q=${encodeURIComponent(
-  VENUE.mapQuery,
-)}&output=embed`;
+/** Key-less embed, pinned by coordinates rather than by name.
+ *
+ *  The name query does not resolve: Google fell back to showing the
+ *  neighbourhood with pins on the surrounding resorts and none on the
+ *  venue, so the map told a guest nothing about where to go. A lat/lng
+ *  query always drops a pin exactly there.
+ *
+ *  What it still cannot do is *label* that pin — for a named place card
+ *  the embed needs a real Google place ID, which VENUE.placeId is not
+ *  yet (it holds a plus code). */
+export const MAPS_EMBED_URL =
+  `https://www.google.com/maps?q=${VENUE.coordinates.lat},${VENUE.coordinates.lng}` +
+  `&z=16&output=embed`;
 
 /**
  * Sub-path the site is served from. Empty for a custom domain or a
@@ -65,15 +74,21 @@ export const ASSETS = {
   /** Backdrop photo. Replace the file at this path to swap it.
    *
    *  It is a crop, not the camera original: BackgroundImage covers a box
-   *  118% of the viewport tall and Ken Burns zooms it 1.02–1.10, so what
-   *  matters is where the faces sit *within the file*. At ~30% down they
-   *  land above the cards at every zoom and on desktop, where the crop
-   *  flips to horizontal. Framed too tight and the 1.10 end of the zoom
-   *  clips the tops of their heads.
+   *  118% of the viewport tall and Ken Burns zooms it 1.02–1.06, so what
+   *  matters is where the faces sit *within the file*. Around a third of
+   *  the way down keeps them above the cards at every zoom, and above
+   *  the scrim, which starts at 36%.
    *
-   *  `design/hero-source.jpg` is the untouched original to re-crop from;
-   *  `design/hero-previous.jpg` is the backdrop this replaced. Both live
-   *  outside public/ so neither is served. */
+   *  The beach frame is cropped less aggressively than that rule would
+   *  suggest, because the source is only 1280x1600 and a full-screen
+   *  backdrop on a 3x phone wants ~1290 across. Zooming further trades
+   *  sharpness the photo does not have to spare; the crop keeps a strip
+   *  of the sunset, which is the reason for this photo.
+   *
+   *  Originals live outside public/ so none of them are served:
+   *  design/hero-source-beach.jpg is this one untouched,
+   *  design/hero-previous-portrait.jpg the backdrop it replaced, and
+   *  design/hero-source.jpg / hero-previous.jpg the pair before that. */
   heroImage: withBasePath('/images/hero.jpg'),
   /** Optional extra section backgrounds (unused in v1, wired for later). */
   sectionImages: [] as string[],
