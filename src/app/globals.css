@@ -20,6 +20,16 @@
   --stone: #6b6258; /* secondary text (4.9:1 on paper) */
   --line: rgba(191, 167, 141, 0.6); /* hairline rules */
 
+  /* How much retractable browser chrome is currently over the page.
+     With viewport-fit=cover, `lvh` is the whole display while `dvh`
+     still excludes Safari's bottom bar, so the difference IS that bar —
+     140px on an iPhone 15 Pro Max with it showing, and 0 the moment it
+     retracts. Sections are laid out to the full screen so the photo and
+     the scrim run under the bar; anything anchored to the bottom adds
+     this so it stays above the bar rather than behind it.
+     Zero everywhere lvh and dvh agree, which is every desktop browser. */
+  --chrome-inset: calc(100lvh - 100dvh);
+
   /* Metallic gold, tuned dark enough to read on ivory. */
   --gold-gradient: linear-gradient(
     105deg,
@@ -109,10 +119,17 @@ body {
      up 128px short and the 17% below it showed the next scene's bare
      backdrop, with the scrim's edge drawn across the screen.
 
-     `dvh` is the viewport as it actually is now. With `viewportFit:
-     'cover'` set in the layout that is the whole screen, so a section
-     fills the display and the photo runs under Safari's bars rather
-     than stopping at them.
+     `lvh`, not `dvh`. With `viewportFit: 'cover'` the display is `lvh`
+     while `dvh` still stops short of Safari's bottom bar — so a `dvh`
+     section ended 140px above the screen, and the hero scrim, which is
+     anchored to the section's bottom, could not reach the display's
+     bottom however far the photo behind it did. `lvh` is the whole
+     screen, so the ivory now runs under the bar with the photo.
+
+     A fixed height is also steadier than a tracking one: `lvh` does not
+     change when the bar retracts, so nothing reflows mid-scroll. What
+     adapts instead is the padding on bottom-anchored content, via
+     --chrome-inset.
 
      An earlier round chased a phantom here — a `--app-vh` probe that
      overrode this when dvh looked wrong. Device readings settled it:
@@ -120,7 +137,7 @@ body {
      all report the same number on iOS. Nothing was lying and the probe
      never fired, so it is gone. If a section ever looks short again,
      measure on the device before adding machinery. */
-  min-height: 100dvh;
+  min-height: 100lvh;
 }
 
 /* Lock scrolling while the opening overlay is up.
@@ -142,19 +159,19 @@ html.overlay-open {
    stays visible above even a short card; a tall card simply grows the
    scene past one viewport (mandatory snap still lets you scroll it). */
 .scene {
-  padding-top: 34dvh;
+  padding-top: 34lvh;
   /* Clearance plus the inset, not the larger of the two: with
      viewport-fit=cover the section runs under the toolbar, so the card
      needs its own breathing room on top of the chrome's height. */
-  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom) + var(--chrome-inset));
 }
 /* Wider screens crop the photo to landscape, so the "photo above,
    card below" split stops making sense — centre the card instead. */
 @media (min-width: 640px) {
   .scene {
     justify-content: center;
-    padding-top: 6dvh;
-    padding-bottom: 6dvh;
+    padding-top: 6lvh;
+    padding-bottom: 6lvh;
   }
 }
 
@@ -217,7 +234,7 @@ html.overlay-open {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 50dvh;
+  min-height: 50lvh;
   padding: calc(var(--torn-edge) + 1.5rem) 1.6rem;
   /* Grain on top, then the sheen, then the ivory sheet. */
   background:
