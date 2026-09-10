@@ -16,9 +16,13 @@ export function Hero({ content }: HeroProps) {
     <section
       id="s0"
       data-scene
-      className="snap-section relative flex items-end justify-center overflow-hidden"
+      className="snap-section relative flex items-end justify-center"
     >
-      <div aria-hidden className="hero-scrim absolute inset-x-0 bottom-0 h-[64%]" />
+      {/* No `overflow-hidden` on the section: the scrim deliberately
+          hangs below it to reach under the browser bar, and clipping
+          here would cut off exactly the part that does the covering.
+          Sideways overflow is already handled globally on <html>. */}
+      <div aria-hidden className="hero-scrim absolute inset-x-0" />
 
       <HeroEntrance>
         {/* The lead-in sits inside the h1 so the heading reads whole —

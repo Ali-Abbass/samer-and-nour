@@ -29,7 +29,7 @@ export function ScrollCue({ label }: ScrollCueProps) {
   return (
     <div
       aria-hidden={hidden}
-      className={`absolute bottom-[calc(1.75rem_+_env(safe-area-inset-bottom)_+_var(--chrome-inset))] left-1/2 z-10 -translate-x-1/2 text-gold-deep transition-opacity duration-700 ${
+      className={`absolute bottom-[calc(1.75rem_+_env(safe-area-inset-bottom))] left-1/2 z-10 -translate-x-1/2 text-gold-deep transition-opacity duration-700 ${
         hidden ? 'pointer-events-none opacity-0' : 'opacity-100'
       }`}
     >

@@ -298,7 +298,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
           visibly happens, which reads as a tap that didn't register. */}
       <div
         aria-hidden
-        className={`intro-loading pointer-events-none absolute inset-0 z-10 flex items-end justify-center pb-[calc(18lvh_+_env(safe-area-inset-bottom)_+_var(--chrome-inset))] transition-opacity duration-300 ${
+        className={`intro-loading pointer-events-none absolute inset-0 z-10 flex items-end justify-center pb-[calc(18dvh_+_env(safe-area-inset-bottom))] transition-opacity duration-300 ${
           effectiveState === 'playing' && !firstFramePainted ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -316,7 +316,7 @@ export function VideoIntro({ content, children }: VideoIntroProps) {
         onClick={() => start(true)}
         disabled={!waiting}
         aria-hidden={!waiting}
-        className={`intro-tap-target absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[calc(5lvh_+_env(safe-area-inset-bottom)_+_var(--chrome-inset))] transition-opacity duration-500 ${
+        className={`intro-tap-target absolute inset-0 z-10 flex cursor-pointer items-end justify-center pb-[calc(5dvh_+_env(safe-area-inset-bottom))] transition-opacity duration-500 ${
           waiting ? 'opacity-100' : 'pointer-events-none opacity-0'
         }`}
       >

@@ -119,17 +119,19 @@ body {
      up 128px short and the 17% below it showed the next scene's bare
      backdrop, with the scrim's edge drawn across the screen.
 
-     `lvh`, not `dvh`. With `viewportFit: 'cover'` the display is `lvh`
-     while `dvh` still stops short of Safari's bottom bar — so a `dvh`
-     section ended 140px above the screen, and the hero scrim, which is
-     anchored to the section's bottom, could not reach the display's
-     bottom however far the photo behind it did. `lvh` is the whole
-     screen, so the ivory now runs under the bar with the photo.
+     `dvh` — the visible viewport. Content inside a section is anchored
+     to its bottom, so the section has to end where the guest can still
+     see, on every browser.
 
-     A fixed height is also steadier than a tracking one: `lvh` does not
-     change when the bar retracts, so nothing reflows mid-scroll. What
-     adapts instead is the padding on bottom-anchored content, via
-     --chrome-inset.
+     An `lvh` section was tried, to let the hero scrim reach under the
+     bar. It does, but it also drops the section's bottom below the
+     fold, and padding the content back up needs the height of the
+     BOTTOM bar specifically — which CSS cannot express. `100lvh -
+     100dvh` is the total retractable chrome, and Chrome on iOS puts
+     bars at both ends, so that padding over-corrected by the whole
+     address bar and pushed the text into the middle of the screen.
+     Only the scrim needs to reach the bottom, so only the scrim
+     overhangs (see .hero-scrim).
 
      An earlier round chased a phantom here — a `--app-vh` probe that
      overrode this when dvh looked wrong. Device readings settled it:
@@ -137,7 +139,7 @@ body {
      all report the same number on iOS. Nothing was lying and the probe
      never fired, so it is gone. If a section ever looks short again,
      measure on the device before adding machinery. */
-  min-height: 100lvh;
+  min-height: 100dvh;
 }
 
 /* Lock scrolling while the opening overlay is up.
@@ -159,19 +161,19 @@ html.overlay-open {
    stays visible above even a short card; a tall card simply grows the
    scene past one viewport (mandatory snap still lets you scroll it). */
 .scene {
-  padding-top: 34lvh;
+  padding-top: 34dvh;
   /* Clearance plus the inset, not the larger of the two: with
      viewport-fit=cover the section runs under the toolbar, so the card
      needs its own breathing room on top of the chrome's height. */
-  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom) + var(--chrome-inset));
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
 }
 /* Wider screens crop the photo to landscape, so the "photo above,
    card below" split stops making sense — centre the card instead. */
 @media (min-width: 640px) {
   .scene {
     justify-content: center;
-    padding-top: 6lvh;
-    padding-bottom: 6lvh;
+    padding-top: 6dvh;
+    padding-bottom: 6dvh;
   }
 }
 
@@ -234,7 +236,7 @@ html.overlay-open {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 50lvh;
+  min-height: 50dvh;
   padding: calc(var(--torn-edge) + 1.5rem) 1.6rem;
   /* Grain on top, then the sheen, then the ivory sheet. */
   background:
@@ -389,6 +391,14 @@ html.overlay-open {
 
 /* ─── Hero ───────────────────────────────────────────────────────────── */
 .hero-scrim {
+  /* The one thing that must reach the physical bottom. Its section ends
+     at the visible viewport so the names sit where they can be read;
+     the ivory then hangs past it by the height of whatever chrome is
+     over the page, so the white runs under the bar with the photo
+     instead of stopping in a band above it. Zero when there is no
+     chrome, i.e. every desktop browser. */
+  bottom: calc(-1 * var(--chrome-inset));
+  height: calc(64% + var(--chrome-inset));
   background: linear-gradient(
     to top,
     var(--ivory) 0%,

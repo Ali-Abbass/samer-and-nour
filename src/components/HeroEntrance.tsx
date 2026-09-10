@@ -33,7 +33,7 @@ export function HeroEntrance({ children }: HeroEntranceProps) {
 
   return (
     <div
-      className={`hero-entrance relative z-10 flex flex-col items-center gap-5 px-6 pb-[calc(7rem_+_env(safe-area-inset-bottom)_+_var(--chrome-inset))] text-center text-ink ${
+      className={`hero-entrance relative z-10 flex flex-col items-center gap-5 px-6 pb-[calc(7rem_+_env(safe-area-inset-bottom))] text-center text-ink ${
         open ? 'is-open' : ''
       }`}
     >
