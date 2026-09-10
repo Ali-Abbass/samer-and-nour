@@ -13,7 +13,7 @@ interface CoupleMarkProps {
  * Two layers, as the original is drawn: the champagne one sits behind
  * and slightly off-register, the gold one on top. Recoloured onto the
  * site palette rather than the artwork's own #8D6D02/#C9BD9A — the
- * stroke takes `currentColor` (--gold-ink, the same gold the couple's
+ * stroke takes `currentColor` (--gold-ink, the same accent the couple's
  * names are set in) so the mark and the names read as one piece.
  *
  * Decorative: the names sit next to it as real text, so this is

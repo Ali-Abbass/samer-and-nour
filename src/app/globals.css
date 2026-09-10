@@ -6,19 +6,28 @@
 :root {
   --ivory: #eeedeb; /* soft white — haze, scrims, glass pills */
   --paper: #ebe8e1; /* the card */
-  --champagne: #bfa78d; /* frames, hairlines */
-  --gold: #c9a04e; /* metallic mid-tone — the photo grade */
-  /* The gold the couple's names and their mark are drawn in. Same hue
-     and saturation as --gold, dropped in lightness until it clears 3:1
-     on paper (3.52:1) — --gold itself is only 1.99:1, which left the
-     names faint on the cards. It also sits close to the #8D6D02 of
-     their original artwork, so this is a step back toward it, not away.
-     Not --gold-deep (5:1): that reads brown rather than gold. */
-  --gold-ink: #98742e;
-  --gold-deep: #7d5c25; /* gold that stays readable on paper (5:1) */
+  /* ── The accent family ────────────────────────────────────────────
+     Terracotta, chosen against the beach photograph. The gold this
+     replaces was picked for the old backdrop, a cream wall; the new one
+     is mostly slate-blue water (#68778D, #738EAB) with a rose sky, and
+     a yellow gold read as an unrelated colour sitting on top of the
+     image rather than drawn out of it. Terracotta comes from the sand
+     and the warm edge of the sky.
+
+     The three are one hue at three contrasts on the card, so they stay
+     a family however they are recombined. Keep the ratios if you
+     re-tint: they are what makes the small text legible.
+
+     The token names still say "gold" — they are identifiers used across
+     the components and Tailwind utilities (text-gold-ink, bg-gold-deep,
+     border-champagne). Renaming them is a separate, wider edit. */
+  --champagne: #c2b0a9; /* frames, hairlines, the mark's under-layer (1.70:1) */
+  --gold: #c9a04e; /* NOT an accent: the warm multiply grade over the photo */
+  --gold-ink: #a8684c; /* the couple's names and their mark (3.61:1) */
+  --gold-deep: #8a543e; /* ornaments, countdown, RSVP, small text (5.02:1) */
   --ink: #2a2521; /* warm charcoal text */
   --stone: #6b6258; /* secondary text (4.9:1 on paper) */
-  --line: rgba(191, 167, 141, 0.6); /* hairline rules */
+  --line: rgba(194, 176, 169, 0.6); /* hairline rules — champagne at 60% */
 
   /* How much retractable browser chrome is currently over the page.
      With viewport-fit=cover, `lvh` is the whole display while `dvh`
@@ -30,14 +39,17 @@
      Zero everywhere lvh and dvh agree, which is every desktop browser. */
   --chrome-inset: calc(100lvh - 100dvh);
 
-  /* Metallic gold, tuned dark enough to read on ivory. */
+  /* The Maps button's metal. Each stop is the old gold stop with its
+     hue rotated to terracotta and its lightness left alone, so the
+     sheen keeps the same light-to-dark structure and only the colour
+     moves. */
   --gold-gradient: linear-gradient(
     105deg,
-    #6e4a12 0%,
-    #a7792c 22%,
-    #dcbd72 46%,
-    #b8893a 64%,
-    #6e4a12 100%
+    #6e2e12 0%,
+    #a7512c 22%,
+    #dc9272 46%,
+    #b8603a 64%,
+    #6e2e12 100%
   );
 
   /* Card-stock tooth: a seamless 200px tile of fractal noise, laid over
@@ -339,8 +351,8 @@ html.overlay-open {
 }
 
 /* ─── Metallic gold text ─────────────────────────────────────────────── */
-/* The couple's names, in the flat gold of their calligraphic mark, so
-   the two read as one piece rather than two different golds.
+/* The couple's names, in the flat accent of their calligraphic mark, so
+   the two read as one piece rather than two different colours.
 
    This used to be `--gold-gradient` clipped to the text and drifted by
    a `gold-shimmer` animation. All of that machinery is gone with it:
