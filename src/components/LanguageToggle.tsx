@@ -51,7 +51,7 @@ export function LanguageToggle({ locale, toggle }: LanguageToggleProps) {
       aria-label={toggle.ariaLabel}
       lang={target}
       dir={target === 'ar' ? 'rtl' : 'ltr'}
-      className={`glass-pill fixed top-5 ${corner} z-40 inline-flex min-h-11 items-center rounded-full px-4 font-body text-xs tracking-wide`}
+      className={`glass-pill fixed top-[calc(1.25rem_+_env(safe-area-inset-top))] ${corner} z-40 inline-flex min-h-11 items-center rounded-full px-4 font-body text-xs tracking-wide`}
     >
       {toggle.label}
     </Link>

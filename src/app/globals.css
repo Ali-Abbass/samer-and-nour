@@ -109,19 +109,18 @@ body {
      up 128px short and the 17% below it showed the next scene's bare
      backdrop, with the scrim's edge drawn across the screen.
 
-     `dvh` is the viewport as it actually is now — correct in Chrome and
-     on Android, and still wrong in iOS Safari and the in-app browsers
-     built on WebKit, which resolve viewport units against their own
-     model of their chrome rather than the area they paint into.
-     Measured in WhatsApp's browser: dvh came up 9% short of the painted
-     height, leaving a band of the next scene below the hero. No choice
-     of svh/dvh/lvh fixes that — all three come from the same model.
+     `dvh` is the viewport as it actually is now. With `viewportFit:
+     'cover'` set in the layout that is the whole screen, so a section
+     fills the display and the photo runs under Safari's bars rather
+     than stopping at them.
 
-     So `--app-vh` overrides it: a script in the layout compares a live
-     100dvh probe against the real height and sets this only when they
-     disagree, which makes it a no-op wherever dvh is already right.
-     The dvh here is the fallback for before that script runs. */
-  min-height: var(--app-vh, 100dvh);
+     An earlier round chased a phantom here — a `--app-vh` probe that
+     overrode this when dvh looked wrong. Device readings settled it:
+     svh, dvh, lvh, innerHeight, clientHeight and visualViewport.height
+     all report the same number on iOS. Nothing was lying and the probe
+     never fired, so it is gone. If a section ever looks short again,
+     measure on the device before adding machinery. */
+  min-height: 100dvh;
 }
 
 /* Lock scrolling while the opening overlay is up.
@@ -143,16 +142,19 @@ html.overlay-open {
    stays visible above even a short card; a tall card simply grows the
    scene past one viewport (mandatory snap still lets you scroll it). */
 .scene {
-  padding-top: calc(0.34 * var(--app-vh, 100dvh));
-  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+  padding-top: 34dvh;
+  /* Clearance plus the inset, not the larger of the two: with
+     viewport-fit=cover the section runs under the toolbar, so the card
+     needs its own breathing room on top of the chrome's height. */
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom));
 }
 /* Wider screens crop the photo to landscape, so the "photo above,
    card below" split stops making sense — centre the card instead. */
 @media (min-width: 640px) {
   .scene {
     justify-content: center;
-    padding-top: calc(0.06 * var(--app-vh, 100dvh));
-    padding-bottom: calc(0.06 * var(--app-vh, 100dvh));
+    padding-top: 6dvh;
+    padding-bottom: 6dvh;
   }
 }
 
@@ -215,7 +217,7 @@ html.overlay-open {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: calc(0.5 * var(--app-vh, 100dvh));
+  min-height: 50dvh;
   padding: calc(var(--torn-edge) + 1.5rem) 1.6rem;
   /* Grain on top, then the sheen, then the ivory sheet. */
   background:
