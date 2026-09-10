@@ -8,6 +8,8 @@ import { OPEN_EVENT } from './invitation';
 const MUTED_KEY = 'invitation:muted';
 const TARGET_VOLUME = 0.35;
 const FADE_MS = 2000;
+/** Silence between the track ending and starting again. */
+const REPLAY_GAP_MS = 1000;
 
 /**
  * The audio element lives at module scope, outside React: switching
@@ -18,9 +20,31 @@ let sharedAudio: HTMLAudioElement | null = null;
 
 function getAudio(): HTMLAudioElement {
   if (!sharedAudio) {
-    sharedAudio = new Audio(ASSETS.audioTrack);
-    sharedAudio.loop = true;
-    sharedAudio.preload = 'auto';
+    const audio = new Audio(ASSETS.audioTrack);
+    // Deliberately NOT `audio.loop = true`. That restarts the instant
+    // the last sample plays, so the track runs on with no seam — this
+    // one is meant to finish, leave a beat of silence, then begin
+    // again. `loop` gives no way to hold that beat, so the repeat is
+    // driven from `ended` instead.
+    audio.loop = false;
+    audio.preload = 'auto';
+    audio.addEventListener('ended', () => {
+      window.setTimeout(() => {
+        // The tab may have gone away during the silence. Starting
+        // audio in a hidden tab would be the one thing worse than not
+        // looping, so hand it to the visibility handler instead, which
+        // resumes on return exactly as it does for a mid-track pause.
+        if (document.hidden) {
+          audio.dataset.resume = 'true';
+          return;
+        }
+        audio.currentTime = 0;
+        audio.play().catch(() => undefined);
+      }, REPLAY_GAP_MS);
+    });
+    // The element is module scope and never torn down, so this listener
+    // is attached once for the life of the page — nothing to clean up.
+    sharedAudio = audio;
   }
   return sharedAudio;
 }
