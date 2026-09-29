@@ -73,7 +73,7 @@ export const en: InvitationContent = {
   closing: {
     line: 'We can’t wait to celebrate with you.',
     monogram: 'S & N',
-    rsvp: 'Kindly confirm your attendance.',
+    rsvp: 'Kindly confirm your attendance',
   },
 
   audio: {
